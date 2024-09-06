@@ -2,7 +2,6 @@ import * as React from 'react';
 import { styled } from '@mui/material/styles';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
-import CssBaseline from '@mui/material/CssBaseline';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
@@ -82,36 +81,6 @@ const StyledFab = styled(Fab)({
 export const BottomAppBar = () => {
 	return (
 		<React.Fragment>
-			<CssBaseline />
-			<Paper square sx={{ pb: '50px' }}>
-				<Typography variant="h5" gutterBottom component="div" sx={{ p: 2, pb: 0 }}>
-					Inbox
-				</Typography>
-				<List sx={{ mb: 2 }}>
-					{messages.map(({ id, primary, secondary, person }) => (
-					<React.Fragment key={id}>
-						{id === 1 && (
-						<ListSubheader sx={{ bgcolor: 'background.paper' }}>
-							Today
-						</ListSubheader>
-						)}
-
-						{id === 3 && (
-						<ListSubheader sx={{ bgcolor: 'background.paper' }}>
-							Yesterday
-						</ListSubheader>
-						)}
-
-						<ListItemButton>
-						<ListItemAvatar>
-							<Avatar alt="Profile Picture" src={person} />
-						</ListItemAvatar>
-						<ListItemText primary={primary} secondary={secondary} />
-						</ListItemButton>
-					</React.Fragment>
-					))}
-				</List>
-			</Paper>
 			<AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
 				<Toolbar>
 					<IconButton color="inherit" aria-label="open drawer">
