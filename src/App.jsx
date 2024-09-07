@@ -4,19 +4,20 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 import { Backdrop, Box, CircularProgress, Divider, Stack } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
+import { useTheme } from '@mui/material/styles';
 
-import { Header } from './components/Header';
-import { IosSwitch } from './components/Switch/IosSwitch';
-import { StickyHeadTable } from './components/Table';
-import { BottomAppBar } from './components/AppBar';
+import { Header } from './muiComponents/Header';
+import { IosSwitch } from './muiComponents/Switch/IosSwitch';
+import { StickyHeadTable } from './muiComponents/Table';
+import { BottomAppBar } from './muiComponents/AppBar';
 
 const API_URL = 'https://localhost:8000';
 axios.defaults.withCredentials = true;
 
 export const App = () => {
-
-    const [ isAuthenticated, setIsAuthenticated ] = useState( false );
-    const [ isLoading, setIsLoading ] = useState( true );
+	const theme = useTheme();
+    const [ isAuthenticated, setIsAuthenticated ] = useState( true );
+    const [ isLoading, setIsLoading ] = useState( false );
     const [ players, setPlayers ] = useState( [] );
 
     const getPlayers = async ( start ) => {
@@ -45,7 +46,7 @@ export const App = () => {
         else if( !isLoading && !isAuthenticated ) {
             window.location.href = `${ API_URL }/login`;
         } else if( !isLoading && isAuthenticated ) {
-            getPlayers();
+            // getPlayers();
         }
 
     }, [ isLoading, isAuthenticated ] );
@@ -64,13 +65,12 @@ export const App = () => {
     }
     
 	return (
-		<>
-            <CssBaseline/>
+		<Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+			<CssBaseline/>
           
             <Header>
                 <p style={{color: 'white'}}>Hello!</p>
             </Header>
-           
             <Box sx={{
                     display: 'flex',
                     width: '100%',
@@ -78,11 +78,12 @@ export const App = () => {
                 }}
             >
                 <IosSwitch/>
-               
             </Box>
-            <Divider/>
-            <StickyHeadTable players={ players } getPlayers={ getPlayers }/>
+			<Divider/>
+			<Box sx={{ flexGrow: 1, overflow: 'auto', overscrollBehavior: 'contain', paddingBottom: theme.mixins.toolbar.minHeight/8 }}>
+            	<StickyHeadTable players={ players } getPlayers={ getPlayers }/>
+			</Box>
             <BottomAppBar/>
-        </>
+        </Box>
 	);
 };

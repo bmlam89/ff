@@ -86,9 +86,7 @@ export const BottomAppBar = () => {
 					<IconButton color="inherit" aria-label="open drawer">
 						<MenuIcon />
 					</IconButton>
-					<StyledFab color="black" aria-label="add">
-						<AddIcon />
-					</StyledFab>
+					
 					<Box sx={{ flexGrow: 1 }} />
 						<IconButton color="inherit">
 							<SearchIcon />
