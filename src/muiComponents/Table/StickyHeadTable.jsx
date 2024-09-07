@@ -5,6 +5,8 @@ import {
     TableHead, TableRow 
 } from '@mui/material';
 
+import { Modal } from '../Modal';
+
 let columns = [
     { l: 'image', h: '' },
     { l: 'name', h: 'name' },
@@ -36,16 +38,19 @@ const rows = [...Array(40)].map( (_, idx) => createData(
 	17,
 	100
 ));
-console.log(rows[0],'rowsss')
 export const StickyHeadTable = ( { players, getPlayers } ) => {
-    
+	const [open, setOpen] = useState(false);
+
     const [ pIdx, setpIdx ] = useState( 0 );
     const handleChangePage = () => {
         setpIdx( prev => +prev + players.length );
         getPlayers( pIdx + players.length );
     };
 
-
+	const clickHandler = (bool) => {
+		console.log('click handler called');
+		setOpen(bool);
+	};
     return (
         <Paper sx={ { width: '100%', height: '100%', overflow: 'hidden' } }>
             <TableContainer sx={ { height: '100%', overflow: 'auto' } }>
@@ -65,18 +70,17 @@ export const StickyHeadTable = ( { players, getPlayers } ) => {
                             ) ) }
                         </TableRow>
                     </TableHead>
-					<Divider/>
                     <TableBody>
 						{rows.map( (p,idx) => 
 							<TableRow 
 								hover 
 								role="checkbox" 
 								tabIndex={ -1 } 
-								key={ p.name }
+								key={ `${p.name}-row` }
 							>
-								{Object.entries(p).map( ([k,v]) =>
+								{Object.entries(p).map( ([k,v], idx2) =>
 									<TableCell 
-										key={p.name}
+										key={`${p.name}-cell-${idx2}`}
 									>
 										{k === 'image' ? 
 										<Box sx={{
@@ -85,9 +89,13 @@ export const StickyHeadTable = ( { players, getPlayers } ) => {
 											width: '100%'
 										}}
 										>
-											<Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-												<img src={v} />
-											</Box> 
+											<Modal open={open} setOpen={clickHandler}>
+												<Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+													<button onClick={clickHandler}>
+														<img src={v} />
+													</button>
+												</Box>
+											</Modal> 
 										</Box>: v}
 									</TableCell>
 								)}
@@ -98,7 +106,6 @@ export const StickyHeadTable = ( { players, getPlayers } ) => {
                     </TableBody>
                 </Table>
             </TableContainer>
-       
         </Paper>
     );
 };
