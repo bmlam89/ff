@@ -1,1 +1,0 @@
-export { StickyHeadTable } from './StickyHeadTable';

@@ -1,1 +1,1 @@
-export { useAvailableHeight } from './useAvailableHeight';
+export { useModal } from './useModal';

@@ -4,18 +4,15 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 
 import { Backdrop, Box, CircularProgress, Divider, Stack } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
-import { useTheme } from '@mui/material/styles';
 
-import { Header } from './muiComponents/Header';
-import { IosSwitch } from './muiComponents/Switch/IosSwitch';
-import { StickyHeadTable } from './muiComponents/Table';
-import { BottomAppBar } from './muiComponents/AppBar';
+import { Header } from './components/Header';
+import { IosSwitch } from './components/Switch/IosSwitch';
+import { Homepage } from './pages/Homepage';
+import { BottomNavbar } from './components/Navbar';
 
 const API_URL = 'https://localhost:8000';
-axios.defaults.withCredentials = true;
 
 export const App = () => {
-	const theme = useTheme();
     const [ isAuthenticated, setIsAuthenticated ] = useState( true );
     const [ isLoading, setIsLoading ] = useState( false );
     const [ players, setPlayers ] = useState( [] );
@@ -65,25 +62,29 @@ export const App = () => {
     }
     
 	return (
-		<Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+		<Router>
 			<CssBaseline/>
-          
-            <Header>
-                <p style={{color: 'white'}}>Hello!</p>
-            </Header>
-            <Box sx={{
-                    display: 'flex',
-                    width: '100%',
-                    flexDirection: 'row-reverse',
-                }}
-            >
-                <IosSwitch/>
-            </Box>
-			<Divider/>
-			<Box sx={{ flexGrow: 1, overflow: 'auto', overscrollBehavior: 'contain', paddingBottom: theme.mixins.toolbar.minHeight/8 }}>
-            	<StickyHeadTable players={ players } getPlayers={ getPlayers }/>
+
+			<Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
+			
+				<Header>
+					<p style={{color: 'white'}}>Hello!</p>
+				</Header>
+				<Box sx={{
+						display: 'flex',
+						width: '100%',
+						flexDirection: 'row-reverse',
+					}}
+				>
+					<IosSwitch/>
+				</Box>
+				<Divider/>
+				<Routes>
+					<Route path="/" element={<Homepage />} />
+				</Routes>
+				
+				<BottomNavbar/>
 			</Box>
-            <BottomAppBar/>
-        </Box>
+		</Router>
 	);
 };

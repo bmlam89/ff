@@ -78,7 +78,7 @@ const StyledFab = styled(Fab)({
 
 
 
-export const BottomAppBar = () => {
+export const BottomNavbar = () => {
 	return (
 		<React.Fragment>
 			<AppBar position="fixed" color="primary" sx={{ top: 'auto', bottom: 0 }}>
