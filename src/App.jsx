@@ -8,12 +8,13 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { Header } from './components/Header';
 import { Homepage } from './pages/Homepage';
 import { BottomNavbar } from './components/Navbar';
+import { Test } from './Test';
 
 const API_URL = 'https://localhost:8000';
 
 export const App = () => {
     const [ isAuthenticated, setIsAuthenticated ] = useState( false );
-    const [ isLoading, setIsLoading ] = useState( true );
+    const [ isLoading, setIsLoading ] = useState( false );
 
     const checkAuthStatus = async () => {
         try {
@@ -25,16 +26,16 @@ export const App = () => {
             setIsLoading( false );
         }
     };
-    useEffect( () => {
+    // useEffect( () => {
         
 
-        if( isLoading ) {
-            checkAuthStatus();
-        } else if( !isLoading && !isAuthenticated ) {
-            window.location.href = `${ API_URL }/login`;
-        } 
+    //     if( isLoading ) {
+    //         checkAuthStatus();
+    //     } else if( !isLoading && !isAuthenticated ) {
+    //         window.location.href = `${ API_URL }/login`;
+    //     } 
 
-    }, [ isLoading, isAuthenticated ] );
+    // }, [ isLoading, isAuthenticated ] );
 
     if( isLoading ) {
         return (
@@ -60,7 +61,7 @@ export const App = () => {
 				</Header>
 				<Divider/>
 				<Routes>
-					<Route path="/" element={<Homepage />} />
+					<Route path="/" element={<Test />} />
 				</Routes>
 				
 				<BottomNavbar/>
