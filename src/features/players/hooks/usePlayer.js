@@ -22,7 +22,7 @@ export const usePlayer = () => {
         } finally {
             setIsFetching(false);
         }
-    }, [players.length]);
+    }, []);
 
 	const getPlayerGamelogs = useCallback(async (pk, season = 2023) => {
 		setIsFetching(true);
