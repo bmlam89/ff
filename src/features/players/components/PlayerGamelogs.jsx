@@ -70,7 +70,7 @@ export const PlayerGamelogs = ({player, season}) => {
 	  ];
 	
 	  return (
-		<Box sx={{ width: '100%', overflowX: 'auto',overscrollBehavior: 'contain' }}>
+		<Box sx={{ width: '100%', overflowX: 'auto',overscrollBehavior: 'contain', maxWidth: '88vw' }}>
 		  <Box sx={{ display: 'inline-flex', gap: 3, minWidth: 'max-content', px: 2}}>
 			<Section
 			  title=" " // Add an empty title to create space
