@@ -33,7 +33,6 @@ export const App = () => {
     const getLeagues = async () => {
         try {
             const response = await axios.get(`${API_URL}/api/v1/leagues`);
-            console.log(response, 'leaguessss')
             setLeagues(response.data.leagues);
         } catch (error) {
             console.error('Error fetching leagues', error);
