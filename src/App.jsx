@@ -7,14 +7,17 @@ import CssBaseline from '@mui/material/CssBaseline';
 
 import { Header } from './components/Header';
 import { Homepage } from './pages/Homepage';
+import { LeagueStandingsPage } from './pages/LeagueStandingsPage';
 import { BottomNavbar } from './components/Navbar';
-import { Test } from './Test';
+
 
 const API_URL = 'https://localhost:8000';
 
 export const App = () => {
     const [ isAuthenticated, setIsAuthenticated ] = useState( false );
-    const [ isLoading, setIsLoading ] = useState( false );
+    const [ isLoading, setIsLoading ] = useState( true );
+    const [ leagues, setLeagues] = useState([]);
+    const [ selectedLeagueIdx, setSelectedLeagueIdx] = useState(0);
 
     const checkAuthStatus = async () => {
         try {
@@ -26,16 +29,29 @@ export const App = () => {
             setIsLoading( false );
         }
     };
-    // useEffect( () => {
+
+    const getLeagues = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/api/v1/leagues`);
+            console.log(response, 'leaguessss')
+            setLeagues(response.data.leagues);
+        } catch (error) {
+            console.error('Error fetching leagues', error);
+            throw error;
+        }
+    }
+    useEffect( () => {
         
 
-    //     if( isLoading ) {
-    //         checkAuthStatus();
-    //     } else if( !isLoading && !isAuthenticated ) {
-    //         window.location.href = `${ API_URL }/login`;
-    //     } 
+        if( isLoading ) {
+            checkAuthStatus();
+        } else if( !isLoading && !isAuthenticated ) {
+            window.location.href = `${ API_URL }/login`;
+        } else if ( !isLoading && isAuthenticated ) {
+            getLeagues();
+        }
 
-    // }, [ isLoading, isAuthenticated ] );
+    }, [ isLoading, isAuthenticated ] );
 
     if( isLoading ) {
         return (
@@ -61,11 +77,13 @@ export const App = () => {
 				</Header>
 				<Divider/>
 				<Routes>
-					<Route path="/" element={<Test />} />
+					<Route path="/" element={<Homepage />} />
+                    <Route path="/league" element={<LeagueStandingsPage league={leagues[selectedLeagueIdx]}/>}/>
 				</Routes>
 				
-				<BottomNavbar/>
+				<BottomNavbar leagues={leagues} setSelectedLeagueIdx={setSelectedLeagueIdx}/>
 			</Box>
 		</Router>
 	);
 };
+
