@@ -6,8 +6,7 @@ import { Backdrop, Box, CircularProgress, Divider } from '@mui/material';
 import CssBaseline from '@mui/material/CssBaseline';
 
 import { Header } from './components/Header';
-import { Homepage } from './pages/Homepage';
-import { LeagueStandingsPage } from './pages/LeagueStandingsPage';
+import { Home, Matchups, MyMatchup, Standings, News } from './pages';
 import { BottomNavbar } from './components/Navbar';
 
 
@@ -38,7 +37,8 @@ export const App = () => {
             console.error('Error fetching leagues', error);
             throw error;
         }
-    }
+    };
+   
     useEffect( () => {
         
 
@@ -51,6 +51,7 @@ export const App = () => {
         }
 
     }, [ isLoading, isAuthenticated ] );
+
 
     if( isLoading ) {
         return (
@@ -76,11 +77,14 @@ export const App = () => {
 				</Header>
 				<Divider/>
 				<Routes>
-					<Route path="/" element={<Homepage />} />
-                    <Route path="/league" element={<LeagueStandingsPage league={leagues[selectedLeagueIdx]}/>}/>
+					<Route path="/" element={<Home />} />
+                    <Route path="/matchups" element={<Matchups league={leagues[selectedLeagueIdx]}/>} />
+					<Route path="/my-matchup" element={<MyMatchup league={leagues[selectedLeagueIdx]}/>} />
+                    <Route path="/standings" element={<Standings league={leagues[selectedLeagueIdx]}/>}/>
+                    <Route path="/news" element={<News />} />
 				</Routes>
 				
-				<BottomNavbar leagues={leagues} setSelectedLeagueIdx={setSelectedLeagueIdx}/>
+				<BottomNavbar leagues={leagues} setSelectedLeagueIdx={setSelectedLeagueIdx} selectedLeagueIdx={selectedLeagueIdx}/>
 			</Box>
 		</Router>
 	);
