@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
 import { Box, CircularProgress, Stack, Typography } from '@mui/material';
 
-export const Matchups = () => {
+export const Matchups = ({league}) => {
     const [isLoading, setIsLoading] = useState(true);
     const [leagueMatchups, setLeagueMatchups] = useState(null);
     const [standings, setStandings] = useState([]);
-    const location = useLocation();
-    const { league } = location.state; 
     const getStandings = async () => {
         try {
             const response = await axios.get(`https://localhost:8000/api/v1/standings?lk=${league.league_key}`);

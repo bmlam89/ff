@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useLocation } from 'react-router-dom';
 import { Box, Button, CircularProgress, Typography, useTheme } from '@mui/material';
 import { FiChevronRight } from 'react-icons/fi';
 
+export const Standings = ({league}) => {
 
-export const Standings = () => {
+    const theme = useTheme();
     const [standings, setStandings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const location = useLocation();
-    const theme = useTheme();
-    const { league } = location.state;
     console.log(theme,'themeee', league,'leagueeee')
     const getStandings = async () => {
+        setIsLoading(true);
         try {
             const response = await axios.get(`https://localhost:8000/api/v1/standings?lk=${league.league_key}`);
             console.log(response.data.standings,'standigns')
@@ -25,19 +23,10 @@ export const Standings = () => {
         }
 
     };
-    const getGame = async ( req, res ) => {
-        try {
-            const url = `https://localhost:8000/api/v1/game/nfl?tk=${league.league_key}`;
-            const resp = await axios.get(url);
-        } catch (error) {
-            console.error('Error trying to get yahoo nfl game resource:', error);
-            throw error;
-        }
-    };
+   
     useEffect(() => {
         getStandings();
-        getGame();
-    }, [] );
+    }, [league] );
 
     if(isLoading) return <Box sx={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center'}}><CircularProgress/></Box>
     return (

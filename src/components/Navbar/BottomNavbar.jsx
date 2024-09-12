@@ -1,14 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
-import { AppBar, Badge, BottomNavigationAction, Box, Button, ClickAwayListener, Grow, IconButton, Stack, Toolbar, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import { AppBar, Backdrop, Box, Button, Grow, IconButton, Toolbar, Typography } from '@mui/material';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
-import { HiOutlineUsers, HiUsers } from "react-icons/hi2";
+import { HiOutlineUserGroup, HiUserGroup } from "react-icons/hi2";
 import { HiOutlineTrophy, HiTrophy } from 'react-icons/hi2';
-import { IoNewspaperOutline, IoNewspaper } from 'react-icons/io5';
-import { PiRanking, PiRankingFill } from "react-icons/pi";
-import { PiFootballHelmet, PiFootballHelmetFill } from "react-icons/pi";
-import { RiRedditLine, RiRedditFill } from "react-icons/ri";
+import { TbVs } from "react-icons/tb";
+import { RiUserSearchLine, RiUserSearchFill } from "react-icons/ri";
 
 const StyledBox = styled(Box)(({ theme }) => ({
     position: 'absolute',
@@ -28,71 +26,73 @@ const StyledBox = styled(Box)(({ theme }) => ({
     zIndex: theme.zIndex?.appBar - 1 || 1099,
 }));
 
-const navButtons = [
+const navOptions = [
+    { name: 'Roster', OutlinedIcon: HiOutlineUserGroup, FilledIcon: HiUserGroup },
+    { name: 'Matchup', OutlinedIcon: TbVs, FilledIcon: TbVs },
+    { name: 'Players', OutlinedIcon: RiUserSearchLine, FilledIcon: RiUserSearchFill },
     { name: 'Leagues', OutlinedIcon: HiOutlineTrophy, FilledIcon: HiTrophy },
-    { name: 'Matchups', OutlinedIcon: HiOutlineUsers, FilledIcon: HiUsers, page: '/matchups' },
-    { name: 'My Matchup', OutlinedIcon: PiFootballHelmet, FilledIcon: PiFootballHelmetFill, page: '/my-matchup' },
-    { name: 'Standings', OutlinedIcon: PiRanking, FilledIcon: PiRankingFill, page: '/standings' },
-    { name: 'Scores & News', OutlinedIcon: RiRedditLine, FilledIcon: RiRedditFill, page: '/news' },
 ];
 
-export const BottomNavbar = ({leagues, setSelectedLeagueIdx, selectedLeagueIdx}) => {
-    const [selectedIdx, setSelectedIdx] = useState(2);
-
-    const handleClose = () => {
-        if(selectedIdx !== 0) {
-            setSelectedIdx(null);
-        }
-        
-    };
-
-    const updateSelectedLeague = (idx) => {
-        setSelectedLeagueIdx(idx);
-        setSelectedIdx(null);
-    }
-
+export const BottomNavbar = ({leagues, setSelectedLeague}) => {
+    const [selectedNavOption, setSelectedNavOption] = useState(navOptions[0]);
+    const [isOpen, setIsOpen] = useState(false);
+    const location = useLocation();
     const navigate = useNavigate();
-    const handleNavigation = (idx) => {
-        if( idx === selectedIdx && idx === 0 ) setSelectedIdx( null ) 
-        else setSelectedIdx( idx );
 
-        const props = { state: { league: leagues[selectedLeagueIdx] } }
-        if(idx === 1) {
-            navigate('/matchups', props);
-        } else if(idx === 2) {
-            navigate('/my-matchup', props);
-        } else if( idx === 3) {
-            navigate('/standings', props);
-        } else {
-            navigate('/news', props);
-        }
-
+    const updateSelectedLeague = (league) => {
+        setSelectedNavOption(navOptions[3])
+        setSelectedLeague(league);
+        navigate(`/leagues/${league.league_key}`);
+        setIsOpen(false); 
     };
-        
-    
 
+    const handleNavigation = (navOption) => {
+        if(navOption.name === 'Leagues') {
+            setIsOpen(!isOpen);
+        } else{
+            setSelectedNavOption(navOption);
+            if(navOption.name === 'Roster') {
+                navigate('/');
+            } else if(navOption.name === 'Matchup') {
+                navigate('/matchup');
+            } else if(navOption.name === 'Players') {
+                navigate('/players');
+            } 
+        }
+    };
+
+    useEffect(() => {
+        const path = location.pathname;
+        if( path === '/') setSelectedNavOption(navOptions[0]);
+        else if ( path === '/matchup' ) setSelectedNavOption(navOptions[1]);
+        else if ( path === '/players' ) setSelectedNavOption(navOptions[2]);
+        else setSelectedNavOption(navOptions[3]);
+    }, []);
     return (
         <>
-            {selectedIdx === 0 && (
-                <ClickAwayListener onClickAway={handleClose}>
-                    <Grow in={selectedIdx === 0} style={{ transformOrigin: '0 100%' }}>
-                        <StyledBox>
-                            {leagues.map((league, idx) => (
-                                <Button key={idx} onClick={() => updateSelectedLeague(idx)}>
-                                    <Typography variant='p' sx={{ color: 'white', fontSize: 18 }}>
-                                        {league.name}
-                                    </Typography>
-                                </Button>
-                            ))}
-                        </StyledBox>
-                    </Grow>
-                </ClickAwayListener>
+            <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+                open={isOpen}
+                onClick={() => setIsOpen(false)}
+            >
+            {isOpen && (
+                <Grow in={isOpen} style={{ transformOrigin: '0 100%' }}>
+                    <StyledBox>
+                        {leagues.map((league, lgIdx) => (
+                            <Button key={lgIdx} onClick={() => updateSelectedLeague(league)}>
+                                <Typography variant='p' sx={{ color: 'white', fontSize: 18 }}>
+                                    {league.name}
+                                </Typography>
+                            </Button>
+                        ))}
+                    </StyledBox>
+                </Grow>
             )}
+            </Backdrop>
             <AppBar position='fixed' color='primary' sx={{ top: 'auto', bottom: 0 }}>
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-                    {navButtons.map((button, idx) => (
+                    {navOptions.map((option, nIdx) => (
                         <IconButton
-                            key={`navbar-${idx}`}
+                            key={`navbar-${nIdx}`}
                             sx={{ 
                                 display: 'flex', 
                                 flexDirection: 'column', 
@@ -103,11 +103,13 @@ export const BottomNavbar = ({leagues, setSelectedLeagueIdx, selectedLeagueIdx})
                                 },
                             }}
                             color='inherit'
-                            onClick={() => handleNavigation(idx)}
-                            disabled={selectedIdx === idx}
+                            onClick={() => handleNavigation(option)}
                         >
-                            {selectedIdx === idx ? <button.FilledIcon /> : <button.OutlinedIcon />}
-                            <Typography fontSize={12}>{button.name}</Typography>
+                            {(selectedNavOption.name === option.name && !isOpen) || (isOpen && option.name === 'Leagues') 
+                                ? <option.FilledIcon /> 
+                                : <option.OutlinedIcon/>
+                            }
+                            <Typography fontSize={12}>{option.name}</Typography>
                         </IconButton>
                     ))}
                 </Toolbar>

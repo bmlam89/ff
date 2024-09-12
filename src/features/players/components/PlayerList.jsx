@@ -31,7 +31,7 @@ export const PlayerList = ({ players }) => {
 	const renderPlayerGamelogs = (player) => openModal(<PlayerGamelogs player={player}/>)
     
     return (
-		<TableContainer sx={ { height: '100%', overflow: 'auto' } }>
+		<TableContainer sx={ {} }>
 			<Table stickyHeader aria-label="sticky table">
 
 				<TableHead>
@@ -46,6 +46,7 @@ export const PlayerList = ({ players }) => {
 					</TableRow>
 				</TableHead>
 				<TableBody>
+                    <TableRow sx={{display: 'flex', height: 300, width: '100%'}}/>
 					{rows.map((p,rIdx) => 
 						<TableRow 
 							hover 

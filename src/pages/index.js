@@ -1,5 +1,5 @@
-export { Home } from './Home';
-export { Matchups } from './Matchups';
-export { MyMatchup } from './MyMatchup';
+
+export { Roster } from './Roster';
+export { Matchup } from './Matchup';
+export { Players } from './Players';
 export { Standings } from './Standings';
-export { News } from './News';
