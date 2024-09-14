@@ -16,6 +16,8 @@ export const useFfService = create((set, get) => ({
     error: null,
     fantasyContent: null,
     team: null,
+    matchup: null,
+    matchups: [],
     selectedLeague: null,
     players: [],
     gamelogs: [],
@@ -47,6 +49,37 @@ export const useFfService = create((set, get) => ({
             set({ team: response.data.fantasy_content.team });
         } catch (err) {
             const errMessage = createErrorMessage('getRoster', err);
+            console.error(errMessage, err);
+            set({ error: errMessage });
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    getMatchup: async () => {
+        set({isLoading: true, error: null});
+        try { 
+            const { fantasyContent, selectedLeague } = get();
+            const response = await ffService.getMatchup(fantasyContent, selectedLeague);
+            set({ matchup: response.data.fantasy_content.team });
+        } catch (err) {
+            const errMessage = createErrorMessage('getMatchup', err);
+            console.error(errMessage, err);
+            set({ error: errMessage });
+        } finally {
+            set({ isLoading: false });
+        }
+    },
+
+    getMatchups: async() => {
+        set({isLoading: true, error: null});
+        try { 
+            const { fantasyContent, selectedLeague } = get();
+            const response = await ffService.getMatchups(fantasyContent, selectedLeague);
+            console.log(response,'response inside of getMatchup');
+            set({ matchup: response.data.fantasy_content.team });
+        } catch (err) {
+            const errMessage = createErrorMessage('getMatchup', err);
             console.error(errMessage, err);
             set({ error: errMessage });
         } finally {
