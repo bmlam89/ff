@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Typography, Box } from '@mui/material';
-import { MySelect } from '../../../components/Select';
-import { MyTabs } from '../../../components/Tabs';
-import { usePlayer } from '../hooks/usePlayer';
+import { MySelect, MyTabs } from '../../../components';
+import { useFfService } from '../hooks/useFfService';
 import { FormControl, InputLabel, Select, MenuItem, NativeSelect } from '@mui/material';
 
 
@@ -55,16 +54,8 @@ const Section = ({ title, headers, data, className }) => (
     </TableContainer>
   </Box>
 );
-export const PlayerGamelogs = ({player, season2}) => {
-    // console.log(player,'player')
-	// const { gamelogs, getPlayerGamelogs, isFetching, error } = usePlayer();
+export const Gamelogs = ({player, season2}) => {
 
-	// useEffect(() => {
-	// 	getPlayerGamelogs(player.pk, season || 2023);
-	//   }, []);
-
-	// if(isFetching) return <Box>Fetching gamelogs...</Box>
-	// if(error) return <Box>Error: {error}</Box>;
     const [season, setSeason] = useState("2024");
 
     useEffect(() => {

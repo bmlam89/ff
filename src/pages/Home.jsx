@@ -1,12 +1,12 @@
 import React from 'react';
 import { Box, useTheme } from '@mui/material';
 
-import { PlayerList } from '../features/players/components/PlayerList';
+import { PlayerList } from '../features/fantasyFootball/components';
 
-import { usePlayer } from '../features/players/hooks/usePlayer';
+import { useFfService } from '../hooks';
 
 export const Home = () => {
-    const { players, isFetching, error } = usePlayer();
+    const { isFetching, error, players } = useFfService();
     const theme = useTheme();
 
     if(isFetching) return <Box>Fetching players...</Box>

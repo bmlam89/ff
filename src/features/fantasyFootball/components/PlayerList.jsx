@@ -1,11 +1,10 @@
-import { useEffect, useState } from 'react';
 import { 
     Box,
     Table, TableBody, TableCell, TableContainer, 
     TableHead, TableRow 
 } from '@mui/material';
 
-import { PlayerGamelogs } from './PlayerGamelogs';
+import { Gamelogs } from './Gamelogs';
 
 import { useModal } from '../../../hooks';
 
@@ -28,7 +27,7 @@ export const PlayerList = ({ players }) => {
     ));
 
     const { openModal } = useModal();
-	const renderPlayerGamelogs = (player) => openModal(<PlayerGamelogs player={player}/>)
+	const renderGamelogs = (player) => openModal(<Gamelogs player={player}/>)
     
     return (
 		<TableContainer sx={ {} }>
@@ -65,7 +64,7 @@ export const PlayerList = ({ players }) => {
 											}}
 										>
 											<Box sx={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
-												<button onClick={() => renderPlayerGamelogs(p)}>
+												<button onClick={() => renderGamelogs(p)}>
 													<img src={p.image} />
 												</button>
 											</Box>

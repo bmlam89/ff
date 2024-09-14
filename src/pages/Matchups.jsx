@@ -32,14 +32,7 @@ export const Matchups = ({league}) => {
     }; 
 
     
-    useEffect(() => {
-        if(!standings.length)  getStandings();
-           
-        if(!leagueMatchups) getMatchups();
 
-        if(standings.length && leagueMatchups) setIsLoading(false);
-
-    }, [standings, leagueMatchups] );
 
     if(isLoading) {
         return <Box sx={{display:'flex', height: '100vh', alignItems: 'center', justifyContent: 'center'}}><CircularProgress/></Box>

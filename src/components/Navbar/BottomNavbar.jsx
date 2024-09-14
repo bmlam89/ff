@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { styled } from '@mui/material/styles';
 import { AppBar, Backdrop, Box, Button, Grow, IconButton, Toolbar, Typography } from '@mui/material';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
-
 import { HiOutlineUserGroup, HiUserGroup } from "react-icons/hi2";
 import { HiOutlineTrophy, HiTrophy } from 'react-icons/hi2';
 import { TbVs } from "react-icons/tb";
 import { RiUserSearchLine, RiUserSearchFill } from "react-icons/ri";
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 
 const StyledBox = styled(Box)(({ theme }) => ({
     position: 'absolute',

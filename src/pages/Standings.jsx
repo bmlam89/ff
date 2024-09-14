@@ -3,8 +3,11 @@ import axios from 'axios';
 import { Box, Button, CircularProgress, Typography, useTheme } from '@mui/material';
 import { FiChevronRight } from 'react-icons/fi';
 
-export const Standings = ({league}) => {
+import { useFfService } from '../hooks';
 
+export const Standings = ({league}) => {
+ 
+    const ffService = useFfService();
     const theme = useTheme();
     const [standings, setStandings] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -12,7 +15,7 @@ export const Standings = ({league}) => {
     const getStandings = async () => {
         setIsLoading(true);
         try {
-            const response = await axios.get(`https://localhost:8000/api/v1/standings?lk=${league.league_key}`);
+            const response = await axios.get(`https://localhost:8000/api/v1/leagues/${league.league_key}/standings`);
             console.log(response.data.standings,'standigns')
             setStandings(response.data.standings);
         } catch (error) {
