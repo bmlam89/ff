@@ -5,7 +5,7 @@ export const useAuth = create((set) => ({
     isLoading: true,
     hasYahooAuth: false,
 
-    getYahooAuthStatus: async () => {
+    setYahooAuthStatus: async () => {
         set({ isLoading: true });
         const response = await authService.getYahooAuthStatus();
         set({
@@ -15,4 +15,5 @@ export const useAuth = create((set) => ({
     },
 
     beginYahooAuth: () => window.location.href = '/auth/yahoo/login'
+    
 }));

@@ -2,26 +2,52 @@ import axios from 'axios';
 axios.defaults.withCredentials = true;
 
 export const ffService = {
-    getFantasyContent: (season) => axios.get(`/api/yahoo/fantasy-content/${season}`),
+    test: (editorial_team_key) => axios.get(`/api/yahoo/test/${editorial_team_key}`),
     
-    getTeam: (fantasyContent, selectedLeague) => {
-        const league = selectedLeague || fantasyContent.users.user.games.game.leagues.league[0];
-        const key = league.teams.team.team_key;
-        return axios.get(`/api/yahoo/teams/${key}`)
-    },
-
-    getMatchup: (fantasyContent, selectedLeague) => {
-        const league = selectedLeague || fantasyContent.users.user.games.game.leagues.league[0];
-        const key = league.teams.team.team_key;
-        return axios.get(`/api/yahoo/teams/${key}/matchups`);   
-    },
-
-    getMatchups: (fantasyContent, selectedLeague) => {
-        const league = selectedLeague || fantasyContent.users.user.games.game.leagues.league[0];
+    getLeagues: (season) => axios.get(`/api/yahoo/user/leagues/${season}`),
+    
+    getLeagueStandings: (league) => {
         const key = league.league_key;
-        return axios.get(`/api/yahoo/leagues/${key}/scoreboard`);   
+        return axios.get(`/api/yahoo/leagues/${key}/teams/standings`);
     },
-    getPlayers: (lk, start, count) => axios.get(`/api/yahoo/leagues/${lk}/players?start=${start}&count=${count}`),
+    
+    getTeamPoints: (team, week) => {
+        const key = team.team_key;
+        return axios.get(`/api/yahoo/teams/${key}/points?week=${week}`);
+    },
+    
+    getRoster: (team, week) => { 
+        const key = team.team_key;
+        return axios.get(`/api/yahoo/teams/${key}/roster?week=${week}`);
+    },
 
-	getGamelogs: (pk, season) => axios.get(`/api/yahoo/players/${pk}/gamelogs/${season}`),
+    getLeagueMatchups: (league, weeks) => {
+        const key = league.league_key;
+        const query = weeks.join(',');
+        return axios.get(`/api/yahoo/leagues/${key}/matchups?weeks=${query}`);   
+    },
+
+    getTeamMatchups: (team, weeks) => {
+        const key = team.team_key;
+        const query = weeks.join(',');
+        return axios.get(`/api/yahoo/teams/${key}/matchups?weeks=${query}`);
+    },
+
+    getPlayerStats: (league, team, roster, week) => {
+        const requestBody = { players: roster.map(player => player.player_key), week };
+        try {
+            return axios.post(
+                `/api/yahoo/leagues/${league.league_key}/teams/${team.team_key}/players/stats`, 
+                requestBody, 
+                { headers: { 'Content-Type': 'application/json' } } 
+            );
+        } catch (error) {
+            console.error('Error fetching player points:', error);
+            throw error;
+        }
+    },
+
+    
+
+
 };

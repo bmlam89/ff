@@ -5,7 +5,9 @@ import { HiOutlineUserGroup, HiUserGroup } from "react-icons/hi2";
 import { HiOutlineTrophy, HiTrophy } from 'react-icons/hi2';
 import { TbVs } from "react-icons/tb";
 import { RiUserSearchLine, RiUserSearchFill } from "react-icons/ri";
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useFfService } from '../../hooks';
 
 const StyledBox = styled(Box)(({ theme }) => ({
     position: 'absolute',
@@ -33,6 +35,8 @@ const navOptions = [
 ];
 
 export const BottomNavbar = ({leagues, setSelectedLeague}) => {
+    const ffService = useFfService();
+
     const [selectedNavOption, setSelectedNavOption] = useState(navOptions[0]);
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
@@ -66,26 +70,28 @@ export const BottomNavbar = ({leagues, setSelectedLeague}) => {
         else if ( path === '/matchup' ) setSelectedNavOption(navOptions[1]);
         else if ( path === '/players' ) setSelectedNavOption(navOptions[2]);
         else setSelectedNavOption(navOptions[3]);
-    }, []);
+
+        if(!ffService.leagues) ffService.initializeApp();
+    }, [ffService.leagues]);
     return (
         <>
             <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
                 open={isOpen}
                 onClick={() => setIsOpen(false)}
             >
-            {isOpen && (
-                <Grow in={isOpen} style={{ transformOrigin: '0 100%' }}>
-                    <StyledBox>
-                        {leagues.map((league, lgIdx) => (
-                            <Button key={lgIdx} onClick={() => updateSelectedLeague(league)}>
-                                <Typography variant='p' sx={{ color: 'white', fontSize: 18 }}>
-                                    {league.name}
-                                </Typography>
-                            </Button>
-                        ))}
-                    </StyledBox>
-                </Grow>
-            )}
+                {isOpen && (
+                    <Grow in={isOpen} style={{ transformOrigin: '0 100%' }}>
+                        <StyledBox>
+                            {ffService.leagues.map((league, lgIdx) => (
+                                <Button key={lgIdx} onClick={() => ffService.setSelectedLeague(league)}>
+                                    <Typography variant='p' sx={{ color: 'white', fontSize: 18 }}>
+                                        {league.name}
+                                    </Typography>
+                                </Button>
+                            ))}
+                        </StyledBox>
+                    </Grow>
+                )}
             </Backdrop>
             <AppBar position='fixed' color='primary' sx={{ top: 'auto', bottom: 0 }}>
                 <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
