@@ -1,6 +1,4 @@
 import React, { useState, createContext, useContext } from 'react';
-import { AppBar, Dialog, IconButton, Slide, Toolbar } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 
 import { FullScreenModal } from '../components';
 
@@ -11,23 +9,28 @@ export const useModal = () => useContext(ModalContext);
 export const ModalProvider = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [content, setContent] = useState(null);
+    const [backButton, setBackButton] = useState(null);
     const [direction, setDirection] = useState(null);
+    const [key, setKey] = useState(0);
 
-    const openModal = ({content, direction}) => {
+    const openModal = ( { content, backButton, direction } ) => {
         setContent(content);
         setDirection(direction);
+        setBackButton(backButton);
+        setKey(prev => prev + 1);
         setIsOpen(true);
     };
 
-    const closeModal = () => {
-        setIsOpen(false);
-        setContent(null);
-    };
-
     return (
-        <ModalContext.Provider value={{ openModal, closeModal }}>
+        <ModalContext.Provider value={{ openModal }}>
             {children}
-            <FullScreenModal isOpen={isOpen} setIsOpen={setIsOpen} direction={direction}>
+            <FullScreenModal
+                key={`${key}-${direction}`} 
+                isOpen={isOpen} 
+                setIsOpen={setIsOpen} 
+                direction={direction}
+                backButton={backButton}
+            >
                 {content}
             </FullScreenModal>
         </ModalContext.Provider>

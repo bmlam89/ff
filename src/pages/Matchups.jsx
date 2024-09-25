@@ -6,7 +6,7 @@ import { MatchupsSkeleton, SelectWeekButtonGroup } from '../components';
 import { Matchup } from './Matchup';
 import { useFfService, useModal } from '../hooks';
 
-export const Matchups = ({isOpen, setIsOpen}) => {
+export const Matchups = () => {
     const ffService = useFfService();
     const { openModal } = useModal();
     const [localSelectedWeek, setLocalSelectedWeek] = useState(ffService.selectedMatchupWeek);
@@ -33,7 +33,11 @@ export const Matchups = ({isOpen, setIsOpen}) => {
     const renderMatchupDetails = async (matchup) => {
         let updatedMatchup = await ffService.getMatchupRosters(matchup, localSelectedWeek);
         updatedMatchup = await ffService.getMatchupStats(updatedMatchup, localSelectedWeek);
-        openModal({content: <MatchupDetails selectedMatchup={updatedMatchup}/>, direction: 'left'});
+        openModal({
+            content: <MatchupDetails selectedMatchup={updatedMatchup}/>, 
+            direction: 'right',
+            backButton: <BackButton/>
+        });
     }
     
     return (
@@ -103,22 +107,22 @@ export const Matchups = ({isOpen, setIsOpen}) => {
     );
 };
 
-const MatchupDetails = ({selectedMatchup}) => {
+const BackButton = () => {
     const { openModal } = useModal();
 
-    const renderMatchups = () => openModal({content: <Matchups/>, direction: 'right'});
-    
+    const renderMatchups = () => openModal({content: <Matchups/>, renderBackButton: true, direction: 'left'});
+
     return (
-        <>
-            <IconButton
-                color="inherit"
-                onClick={renderMatchups}
-                aria-label="back"
-                sx={{position: 'absolute', top: 2, left: 2.5, zIndex: 1300}}
-            >
-                <FiChevronLeft color='#FFFFFF' width={24} height={24}/>
-            </IconButton>
-            <Matchup selectedMatchup={selectedMatchup} hideButton={true}/>
-        </>
+        <IconButton
+            color="inherit"
+            onClick={renderMatchups}
+            aria-label="back"
+        >
+            <FiChevronLeft color='#FFFFFF'/>
+        </IconButton>
     )
+};
+
+const MatchupDetails = ({selectedMatchup}) => {
+    return <Matchup selectedMatchup={selectedMatchup} hideButton={true}/>;
 };

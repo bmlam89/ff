@@ -11,7 +11,10 @@ const Header = ({matchup, hideButton}) => {
     const { openModal } = useModal();
 
     const { teams } = matchup;
-    const renderMatchups = () => openModal({content: <Matchups/>, direction: 'up'});
+    const renderMatchups = () => openModal({
+        content: <Matchups/>, 
+        direction: 'up'
+    });
 
     return (
         <Box sx={{
