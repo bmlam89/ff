@@ -1,10 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress, Stack, Typography } from '@mui/material';
-import { useAuth, useFfService } from '../hooks';
+import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { useFfService } from '../hooks';
+import { SelectWeekButtonGroup } from '../components';
+import { Matchups } from './Matchups';
 
-const Header = () => {
+import { useModal } from '../hooks';
+
+const Header = ({matchup, hideButton}) => {
     const ffService = useFfService();
-    const { teams } = ffService.selectedMatchup;
+    const { openModal } = useModal();
+
+    const { teams } = matchup;
+    const renderMatchups = () => openModal({content: <Matchups/>, direction: 'up'});
 
     return (
         <Box sx={{
@@ -13,16 +20,36 @@ const Header = () => {
             width: '100%',
             paddingX: 2.5,
             paddingY: 2,
+            gap: 0.5,
             borderBottom: '1px black solid'
         }}>
             <TeamNames teams={teams.team} />
             <ScoreAndLogos teams={teams.team} />
             <ProjectionsAndWinProbability teams={teams.team} />
+            <Box sx={{display: 'flex', gap: 2.5, width: 'fit'}}>
+                {!hideButton && <>
+                    <SelectWeekButtonGroup selectedWeek={+ffService.selectedMatchupWeek} setSelectedWeek={(week) => ffService.updateMatchupPageWeek(week)}/> 
+                    <Button 
+                        sx={{
+                            display: 'flex', 
+                            backgroundColor: 'primary.main', 
+                            color: 'primary.main', 
+                            borderRadius: '20px', 
+                            paddingX: 2, 
+                            maxHeight: '18px'
+                        }}
+                        onClick={renderMatchups}
+                    >
+                            <Typography color='#FFFFFF' fontSize={13} textTransform='none'>All matchups</Typography>
+                        </Button> 
+                </>}
+            </Box>
         </Box>
+        
     );
 };
 
-const TeamNames = ({ teams }) => (
+export const TeamNames = ({ teams }) => (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
         {teams.map((team, index) => (
             <Typography key={index} fontSize={12}>{team.name}</Typography>
@@ -30,7 +57,7 @@ const TeamNames = ({ teams }) => (
     </Box>
 );
 
-const ScoreAndLogos = ({ teams }) => (
+export const ScoreAndLogos = ({ teams }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         <TeamLogo url={teams[0].team_logos.team_logo.url} />
         <ScoreDisplay teams={teams} />
@@ -38,11 +65,11 @@ const ScoreAndLogos = ({ teams }) => (
     </Box>
 );
 
-const TeamLogo = ({ url }) => (
+export const TeamLogo = ({ url }) => (
     <img src={url} style={{ width: '48px', height: '48px', borderRadius: '50%' }} alt="Team Logo" />
 );
 
-const ScoreDisplay = ({ teams }) => (
+export const ScoreDisplay = ({ teams }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
         <Typography fontSize={32}>{teams[0].team_points.total}</Typography>
         <Typography sx={{ fontSize: 16, color: 'gray', fontWeight: 600 }}>/</Typography>
@@ -50,7 +77,7 @@ const ScoreDisplay = ({ teams }) => (
     </Box>
 );
 
-const ProjectionsAndWinProbability = ({ teams }) => (
+export const ProjectionsAndWinProbability = ({ teams }) => (
     <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
         <TeamProjection team={teams[0]} align="start" />
         <ProjectionLabels />
@@ -58,21 +85,21 @@ const ProjectionsAndWinProbability = ({ teams }) => (
     </Box>
 );
 
-const TeamProjection = ({ team, align }) => (
+export const TeamProjection = ({ team, align }) => (
     <Stack sx={{ alignItems: align }}>
         <Typography fontSize={12}>{team.team_projected_points.total}</Typography>
         <Typography fontSize={12}>{parseInt(team.win_probability * 100)}%</Typography>
     </Stack>
 );
 
-const ProjectionLabels = () => (
+export const ProjectionLabels = () => (
     <Stack sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <Typography fontSize={12}>Live Projected</Typography>
         <Typography fontSize={12}>Win %</Typography>
     </Stack>
 );
 
-const PlayerInfo = ({ player, align }) => (
+export const PlayerInfo = ({ player, align }) => (
     <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between',
@@ -93,7 +120,7 @@ const PlayerInfo = ({ player, align }) => (
     </Box>
 );
 
-const PlayerDetails = ({ player, align }) => (
+export const PlayerDetails = ({ player, align }) => (
     <Stack sx={{ alignItems: align === 'right' ? 'flex-end' : 'flex-start' }}>
         <Typography fontSize={12}>
             {player.name.first[0]}. {player.name.last}
@@ -104,7 +131,7 @@ const PlayerDetails = ({ player, align }) => (
     </Stack>
 );
 
-const PlayerPoints = ({ points }) => (
+export const PlayerPoints = ({ points }) => (
     <Stack justifyContent='center'>
         <Typography fontSize={14}>
             {points}
@@ -112,7 +139,7 @@ const PlayerPoints = ({ points }) => (
     </Stack>
 );
 
-const PositionBox = ({ position }) => (
+export const PositionBox = ({ position }) => (
     <Box sx={{
         paddingX: 2,
         paddingY: 1,
@@ -128,49 +155,18 @@ const PositionBox = ({ position }) => (
     </Box>
 );
 
-export const Matchup = () => {
-    const authService = useAuth();
+export const Matchup = ({selectedMatchup, hideButton}) => {
     const ffService = useFfService();
-    const [rosters, setRosters] = useState([]);
-
-    // useEffect(() => {
-    //     const fetchData = async () => {
-    //         if (authService.hasYahooAuth && !ffService.isLoading) {
-    //             const teams = ffService.selectedMatchup.teams.team;
-    //             try {
-    //                 const data = await ffService.getMatchupRosters(teams, ffService.selectedLeague.current_week);
-    //                 setRosters(data);
-    //             } catch (error) {
-    //                 console.error('Error fetching rosters:', error);
-    //             }
-    //         }
-    //     };
-    //     fetchData();
-    // }, [authService.hasYahooAuth, ffService.isLoading]);
-
-    const initializeApp = async () => {
-        if(!ffService.selectedMatchup)
-            ffService.initializeApp();
-        else {
-            const teams = ffService.selectedMatchup.teams.team;
-            try {
-                const data = await ffService.getMatchupRosters(teams, ffService.selectedLeague.current_week);
-                setRosters(data);
-            } catch (error) {
-                console.error('Error fetching rosters:', error);
-            }
-        }
-    };
-
+    const [matchup, setMatchup] = useState(selectedMatchup);
+    
     useEffect(() => {
-        initializeApp();
-    }, [ffService.selectedMatchup]);
-
-
+        if(!ffService.selectedMatchupWeek && !matchup) ffService.setInitialAppData();
+        else if(!matchup) setMatchup(ffService.selectedMatchup);
+    }, [ffService.selectedMatchupWeek]);
 
     const POSITIONS = ['QB', 'WR', 'RB', 'TE', 'W/R/T', 'K', 'DEF', 'BN'];
 
-    if (ffService.isLoading || !rosters?.length) return (
+    if (ffService.isLoading || !matchup) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <CircularProgress />
         </Box>
@@ -184,8 +180,8 @@ export const Matchup = () => {
         return mappedPlayers;
     };
 
-    const playersByPosition1 = mapPlayersByPosition(rosters[0]);
-    const playersByPosition2 = mapPlayersByPosition(rosters[1]);
+    const playersByPosition1 = mapPlayersByPosition(matchup.teams.team[0].roster);
+    const playersByPosition2 = mapPlayersByPosition(matchup.teams.team[1].roster);
 
     return (
         <Box sx={{
@@ -205,7 +201,10 @@ export const Matchup = () => {
                     display: 'none',
                 },
             }}>
-                <Header />
+                <Stack sx={{gap: 1}}>
+                    <Header matchup={ matchup } hideButton={hideButton}/>
+                </Stack>
+
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                     {POSITIONS.map(position => (
                         <Box key={position}>

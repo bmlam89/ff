@@ -1,6 +1,8 @@
 export { Header } from './Header/Header';
 export { DarkScreenLoading } from './Loading/DarkScreenLoading';
+export { MatchupsSkeleton } from './Skeleton/MatchupsSkeleton';
 export { Modal } from './Modal/Modal';
+export { FullScreenModal } from './Modal/FullScreenModal';
 export { SelectWeekButtonGroup } from './Button/SelectWeekButtonGroup';
 export { BottomNavbar } from './Navbar/BottomNavbar';
 export { TopNavbar } from './Navbar/TopNavbar';

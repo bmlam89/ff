@@ -3,7 +3,7 @@ axios.defaults.withCredentials = true;
 
 export const ffService = {
     test: (editorial_team_key) => axios.get(`/api/yahoo/test/${editorial_team_key}`),
-    
+
     getLeagues: (season) => axios.get(`/api/yahoo/user/leagues/${season}`),
     
     getLeagueStandings: (league) => {
@@ -21,23 +21,21 @@ export const ffService = {
         return axios.get(`/api/yahoo/teams/${key}/roster?week=${week}`);
     },
 
-    getLeagueMatchups: (league, weeks) => {
+    getLeagueMatchups: (league, week) => {
         const key = league.league_key;
-        const query = weeks.join(',');
-        return axios.get(`/api/yahoo/leagues/${key}/matchups?weeks=${query}`);   
+        return axios.get(`/api/yahoo/leagues/${key}/matchups?week=${week}`);   
     },
 
-    getTeamMatchups: (team, weeks) => {
+    getTeamMatchups: (team, week) => {
         const key = team.team_key;
-        const query = weeks.join(',');
-        return axios.get(`/api/yahoo/teams/${key}/matchups?weeks=${query}`);
+        return axios.get(`/api/yahoo/teams/${key}/matchups?week=${week}`);
     },
 
-    getPlayerStats: (league, team, roster, week) => {
-        const requestBody = { players: roster.map(player => player.player_key), week };
+    getPlayerStats: (league, roster, week) => {
+        const requestBody = { players: roster.map(player => player.player_key), week: week };
         try {
             return axios.post(
-                `/api/yahoo/leagues/${league.league_key}/teams/${team.team_key}/players/stats`, 
+                `/api/yahoo/leagues/${league.league_key}/players/stats`, 
                 requestBody, 
                 { headers: { 'Content-Type': 'application/json' } } 
             );
@@ -46,8 +44,5 @@ export const ffService = {
             throw error;
         }
     },
-
-    
-
 
 };

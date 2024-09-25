@@ -53,7 +53,7 @@ const Header = () => {
                 width: '100%',
                 gap: 3,
             }}>
-                <SelectWeekButtonGroup/>
+                <SelectWeekButtonGroup selectedWeek={+ffService.selectedRosterWeek} setSelectedWeek={async (week) => await ffService.updateRosterPageWeek(week)}/>
                 <Button 
                     variant="outlined"
                     sx={{
@@ -133,14 +133,6 @@ const Header = () => {
 };
 
 const PlayerCard = ({ player }) => {
-    const ffService = useFfService();
-    useEffect(() => {
-        const getData = async () => {
-            if(player.name.first === 'Joe') {
-                const response = await ffService.test(player.editorial_team_key);
-            }
-        }
-    }, []);
 
     return (
         <Box sx={{
@@ -186,31 +178,11 @@ const PlayerCard = ({ player }) => {
 };
 
 export const Roster = () => {
-    const authService = useAuth();
     const ffService = useFfService();
-    const [selectedWeek, setSelectedWeek] = useState(null);
 
     useEffect(() => {
-
-        if(authService.hasYahooAuth && !ffService.isLoading) {
-            if(!selectedWeek) setSelectedWeek(ffService.selectedLeague.current_week);
-            console.log(ffService,'ffService inside Roster page')
-
-            console.log('logo:', ffService.selectedTeam.team_logos.team_logo.url);
-            console.log('team name:', ffService.selectedTeam.name);
-            console.log('record:', `
-                ${ffService.selectedTeam.team_standings.outcome_totals.wins}.
-                ${ffService.selectedTeam.team_standings.outcome_totals.losses}.
-                ${ffService.selectedTeam.team_standings.outcome_totals.ties}
-            `);
-            console.log('standing:', ffService.selectedTeam.team_standings.rank);
-            console.log('first name:', ffService.selectedTeam.managers.manager.nickname);
-            console.log('selected week actual points:', ffService.selectedTeam.team_points.total);
-            console.log('selected week projected team points:', ffService.selectedTeam.team_projected_points.total);
-            console.log('selected week', ffService.selectedLeague.current_week);
-            console.log('roster:', ffService.selectedTeam.roster);
-        }
-    }, [authService.hasYahooAuth, ffService.isLoading]);
+        if(!ffService.selectedRosterWeek) ffService.setInitialAppData();
+    }, [ffService]);
 
     if(ffService.isLoading) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
@@ -240,7 +212,7 @@ export const Roster = () => {
                     },
                 }}
             >
-                <Header />
+                <Header/>
                 <Box sx={{display: 'flex', width: '100%', backgroundColor: 'gray', justifyContent: 'start', paddingX: 2.5, paddingY: 0.5}}>
                     <Typography fontSize={12} color='white' textTransform='uppercase'>Offense</Typography>
                 </Box>

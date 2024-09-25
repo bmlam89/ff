@@ -1,90 +1,124 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Box, CircularProgress, Stack, Typography } from '@mui/material';
+import { Box, Button, IconButton, Stack, Typography } from '@mui/material';
+import { FiChevronLeft } from 'react-icons/fi';
 
-export const Matchups = ({league}) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const [leagueMatchups, setLeagueMatchups] = useState(null);
-    const [standings, setStandings] = useState([]);
-    const getStandings = async () => {
-        try {
-            const response = await axios.get(`https://localhost:8000/api/v1/standings?lk=${league.league_key}`);
-            console.log(response.data.standings,'standigns');
-            setStandings(response.data.standings);
-        } catch (error) {
-            console.error('Error trying to get standings.', error);
-            throw error;
-        }
+import { MatchupsSkeleton, SelectWeekButtonGroup } from '../components';
+import { Matchup } from './Matchup';
+import { useFfService, useModal } from '../hooks';
 
+export const Matchups = ({isOpen, setIsOpen}) => {
+    const ffService = useFfService();
+    const { openModal } = useModal();
+    const [localSelectedWeek, setLocalSelectedWeek] = useState(ffService.selectedMatchupWeek);
+
+    const getTeamRecord = (team) => {
+        const data = ffService.selectedLeague.teams.find(t => t.team_key === team.team_key);
+        return `${data.team_standings.outcome_totals.wins}-${data.team_standings.outcome_totals.losses}-${data.team_standings.outcome_totals.ties}`;
     };
-    const getMatchups = async () => {
-        try {
-            const url = `https://localhost:8000/api/v1/matchups?lk=${league.league_key}`;
-            const resp = await axios.get(url);
-            const scoreboard = resp.data.league.scoreboard.matchups;
-            setLeagueMatchups(resp.data.league);
-            console.log(scoreboard,'scoreboardddd')
-        } catch (error) {
-            console.error('Error trying to get all matchups', error);
-            throw error;
-        } 
-       
-    }; 
 
-    
+    useEffect(() => {
+        if (!ffService.selectedLeague) ffService.setInitialAppData();
+    }, [ffService]);
 
+    useEffect(() => {
+        ffService.updateMatchups(localSelectedWeek);
+    }, [localSelectedWeek]);
 
-    if(isLoading) {
-        return <Box sx={{display:'flex', height: '100vh', alignItems: 'center', justifyContent: 'center'}}><CircularProgress/></Box>
+    if(ffService.isUpdating) return (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+            <MatchupsSkeleton/>
+        </Box>
+    );
+
+    const renderMatchupDetails = async (matchup) => {
+        let updatedMatchup = await ffService.getMatchupRosters(matchup, localSelectedWeek);
+        updatedMatchup = await ffService.getMatchupStats(updatedMatchup, localSelectedWeek);
+        openModal({content: <MatchupDetails selectedMatchup={updatedMatchup}/>, direction: 'left'});
     }
+    
     return (
-        <Stack gap={3} paddingX={3} paddingTop={2}>
-
-            <Typography fontSize={14}>Week {leagueMatchups.scoreboard.week}</Typography>
-            <Stack gap={4} sx={{height: '100vh', overflow: 'auto', overscrollBehavior: 'contain', paddingBottom: 0}}>
-                {leagueMatchups.scoreboard.matchups.matchup.map((match, idx) => 
-                    <Box key={idx} sx={{width: '100%', display: 'flex'}}>
-                        <Box sx={{display: 'flex', width: '100%', flexDirection: 'column', gap: 4}}>
-                            
-                            <Box sx={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                    {(standings.find(t => t.team_key === match.teams.team[0].team_key)).team_standings.rank}
-                                    <img src={match.teams.team[0].team_logos.team_logo.url} style={{width:40, height: 40, borderRadius: 100}}/>
-                                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                                    <Typography fontSize={13} fontWeight={600}>{match.teams.team[0].name} ({(Number(match.teams.team[0].win_probability)*100).toFixed()}%)</Typography>
-                                        <Box sx={{display: 'flex'}}>
-                                            <Typography fontSize={12}>{match.teams.team[0].managers.manager.nickname}</Typography>
-                                            <Typography fontSize={12}>1-0-0</Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'end', width: 'fit'}}>
-                                    <Typography fontSize={12}>------</Typography>
-                                    <Typography fontSize={12}>{match.teams.team[0].team_projected_points.total}</Typography>
-                                </Box>
-                            </Box>
-                            <Box sx={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
-                                <Box sx={{display: 'flex', alignItems: 'center', gap: 2}}>
-                                    {(standings.find(t => t.team_key === match.teams.team[1].team_key)).team_standings.rank}
-                                    <img src={match.teams.team[1].team_logos.team_logo.url} style={{width:40, height: 40, borderRadius: 100}}/>
-                                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
-                                    <Typography fontSize={13} fontWeight={600}>{match.teams.team[1].name} ({(Number(match.teams.team[1].win_probability)*100).toFixed()}%)</Typography>
-                                        <Box sx={{display: 'flex'}}>
-                                            <Typography fontSize={12}>{match.teams.team[1].managers.manager.nickname} </Typography>
-                                            <Typography fontSize={12}>1-0-0</Typography>
-                                        </Box>
-                                    </Box>
-                                </Box>
-                                <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'end', width: 'fit'}}>
-                                    <Typography fontSize={12}>------</Typography>
-                                    <Typography fontSize={12}>{match.teams.team[1].team_projected_points.total}</Typography>
-                                </Box>
-                            </Box>
-                        </Box>
-                    
+        <Box sx={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
+            {ffService.selectedLeague?.matchups && (
+            <Stack gap={3} sx={{ flexGrow: 1, overflow: 'auto', paddingX: 3, paddingY: 2 }}>
+                    <Box sx={{ paddingY: 0.5 }}>
+                        <SelectWeekButtonGroup 
+                            selectedWeek={+localSelectedWeek} 
+                            setSelectedWeek={(week) => setLocalSelectedWeek(week)}
+                        />
                     </Box>
-                )}
-            </Stack>
-        </Stack>
+                    <Stack gap={4}>
+                        {ffService.selectedLeague?.matchups.map((match, idx) => (
+                            <Button 
+                                key={idx} 
+                                sx={{ display: 'block', width: '100%', textAlign: 'left', padding: 0 }}
+                                onClick={() => renderMatchupDetails(match)}
+                            >
+                                <Box
+                                    id='matchup-container'
+                                    sx={{
+                                        width: '100%',
+                                        display: 'flex',
+                                        paddingX: 2.5,
+                                        paddingY: 2,
+                                        border: 'solid 1.5px black',
+                                        borderRadius: '20px'
+                                    }}
+                                >
+                                    <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 4 }}>
+                                        {[0, 1].map((teamIndex) => (
+                                            <Box key={teamIndex} sx={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                                                    <Typography fontSize={12}>
+                                                        {(ffService.selectedLeague.teams.find(t => t.team_key === match.teams.team[teamIndex].team_key)).team_standings.rank}
+                                                    </Typography>
+                                                    <img 
+                                                        src={match.teams.team[teamIndex].team_logos.team_logo.url} 
+                                                        style={{ width: 40, height: 40, borderRadius: 100 }} 
+                                                        alt={`Team ${teamIndex + 1} logo`}
+                                                    />
+                                                    <Box sx={{ display: 'flex', flexDirection: 'column', gapX: 1 }}>
+                                                        <Typography fontSize={13} fontWeight={600}>
+                                                            {match.teams.team[teamIndex].name} ({(Number(match.teams.team[teamIndex].win_probability) * 100).toFixed()}%)
+                                                        </Typography>
+                                                        <Box sx={{ display: 'flex', gap: 1 }}>
+                                                            <Typography fontSize={12}>{match.teams.team[teamIndex].managers.manager.nickname}</Typography>
+                                                            <Typography fontSize={12}>{getTeamRecord(match.teams.team[teamIndex])}</Typography>
+                                                        </Box>
+                                                    </Box>
+                                                </Box>
+                                                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'end', width: 'fit-content', gap: 1 }}>
+                                                    <Typography fontSize={12}>{match.teams.team[teamIndex].team_points.total}</Typography>
+                                                    <Typography fontSize={12}>{match.teams.team[teamIndex].team_projected_points.total}</Typography>
+                                                </Box>
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                </Box>
+                            </Button>
+                        ))}
+                    </Stack>
+                </Stack>
+            )}
+        </Box>
+    );
+};
+
+const MatchupDetails = ({selectedMatchup}) => {
+    const { openModal } = useModal();
+
+    const renderMatchups = () => openModal({content: <Matchups/>, direction: 'right'});
+    
+    return (
+        <>
+            <IconButton
+                color="inherit"
+                onClick={renderMatchups}
+                aria-label="back"
+                sx={{position: 'absolute', top: 2, left: 2.5, zIndex: 1300}}
+            >
+                <FiChevronLeft color='#FFFFFF' width={24} height={24}/>
+            </IconButton>
+            <Matchup selectedMatchup={selectedMatchup} hideButton={true}/>
+        </>
     )
 };

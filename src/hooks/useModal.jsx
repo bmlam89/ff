@@ -1,8 +1,8 @@
 import React, { useState, createContext, useContext } from 'react';
-import { Box } from '@mui/material';
-import Dialog from '@mui/material/Dialog';
-import IconButton from '@mui/material/IconButton';
+import { AppBar, Dialog, IconButton, Slide, Toolbar } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
+
+import { FullScreenModal } from '../components';
 
 const ModalContext = createContext(null);
 
@@ -11,9 +11,11 @@ export const useModal = () => useContext(ModalContext);
 export const ModalProvider = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [content, setContent] = useState(null);
+    const [direction, setDirection] = useState(null);
 
-    const openModal = (modalContent) => {
-        setContent(modalContent);
+    const openModal = ({content, direction}) => {
+        setContent(content);
+        setDirection(direction);
         setIsOpen(true);
     };
 
@@ -25,23 +27,9 @@ export const ModalProvider = ({ children }) => {
     return (
         <ModalContext.Provider value={{ openModal, closeModal }}>
             {children}
-            <Dialog open={isOpen} onClose={closeModal}>
-                <IconButton
-                    aria-label="close"
-                    onClick={closeModal}
-                    sx={{
-                        position: 'absolute',
-                        right: 3,
-                        top: 3,
-                        color: 'black',
-                    }}
-                >
-                    <CloseIcon />
-                </IconButton>
-                <Box sx={{ display: 'flex', flexDirection: 'column', paddingTop: 5, paddingBottom: 3, gap: 2}}>
-                    {content}
-                </Box>
-            </Dialog>
+            <FullScreenModal isOpen={isOpen} setIsOpen={setIsOpen} direction={direction}>
+                {content}
+            </FullScreenModal>
         </ModalContext.Provider>
     );
 };
