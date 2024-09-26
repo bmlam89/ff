@@ -23,22 +23,32 @@ const initialState = {
     leagues: [],
     selectedLeague: null,
     selectedTeam: null,
-    selectedRosterWeek: null,
+    rosterWeek: null,
+    partialMatchup: null,
     selectedMatchup: null,
-    selectedMatchupWeek: null,
+    matchupWeek: null,
+    matchupsWeek: null,
     standings: null,
-    scores: [],
-    teamMatchups: [],
-    players: [],
-    gamelogs: [],
+
 };
 
 export const useFfService = create((set, get) => ({
     ...initialState,
+    
     test: async (editorial_team_key) => {
         const response = await ffService.test(editorial_team_key);
         return response;
     },
+
+    clearStates: () => set((state) => ({
+        ...initialState,
+        isLoading: false,
+        season: state.season,
+        guid: state.guid,
+        gameId: state.gameId,
+        gameCode: state.gameCode,
+        leagues: state.leagues,
+    })),
 
     setLeagues: async () => {
         const { season, selectedLeague } = get();
@@ -50,7 +60,6 @@ export const useFfService = create((set, get) => ({
                 gameCode: response.data.fantasy_content.users.user.games.game.code,
                 leagues: response.data.fantasy_content.users.user.games.game.leagues.league,
                 selectedLeague: selectedLeague ? selectedLeague : response.data.fantasy_content.users.user.games.game.leagues.league[0],
-                selectedRosterWeek: response.data.fantasy_content.users.user.games.game.leagues.league[0].current_week,
             });
         } catch (err) {
             const errMessage = createErrorMessage('setLeagues', err, { season });
@@ -98,6 +107,7 @@ export const useFfService = create((set, get) => ({
                     ...selectedTeam, 
                     roster: response.data.fantasy_content.team.roster.players.player
                 },
+                rosterWeek: week
             });
         } catch (err) {
             const errMessage = createErrorMessage('setRoster', err);
@@ -139,7 +149,7 @@ export const useFfService = create((set, get) => ({
             console.error(errMessage, err);
         }
     },
-    
+
     setTeamMatchups: async (week = null) => {
         const { selectedLeague, selectedTeam } = get();
         week = week ? String(week) : selectedLeague.current_week;
@@ -149,8 +159,9 @@ export const useFfService = create((set, get) => ({
                     ...selectedTeam,
                     matchups: response.data.fantasy_content.team.matchups.matchup,
                 },
-                selectedMatchup: response.data.fantasy_content.team.matchups.matchup.find(m => m.week === week),
-                selectedMatchupWeek: response.data.fantasy_content.team.matchups.matchup.find(m => m.week === week).week,
+                matchupWeek: week,
+                matchupsWeek: week,
+                partialMatchup: response.data.fantasy_content.team.matchups.matchup.find(m => m.week === week),
             });
         } catch (err) {
             const errMessage = createErrorMessage('setTeamMatchup', err);
@@ -159,25 +170,25 @@ export const useFfService = create((set, get) => ({
     },
 
     setMatchupRosters: async (teams = null, week = null) => {
-        const { selectedMatchup } = get();
-        teams = teams ? teams : selectedMatchup.teams.team;
-        week = week ? week : selectedMatchup.week;
+        const { partialMatchup } = get();
+        teams = teams ? teams : partialMatchup.teams.team;
+        week = week ? week : partialMatchup.week;
         const rosters = [];
         try {
             for(let i = 0; i < teams.length; i++) {
                 const response = await ffService.getRoster(teams[i], week);
                 rosters.push(response.data.fantasy_content.team.roster.players.player);
-                set({selectedMatchup: {
-                        ...selectedMatchup, 
-                        teams: {
-                            team:[
-                                {...selectedMatchup.teams.team[0], roster: rosters[0]},
-                                {...selectedMatchup.teams.team[1], roster: rosters[1]},
-                            ]
-                        }
-                    }
-                })
             }
+            set({partialMatchup: {
+                    ...partialMatchup, 
+                    teams: {
+                        team:[
+                            {...partialMatchup.teams.team[0], roster: rosters[0]},
+                            {...partialMatchup.teams.team[1], roster: rosters[1]},
+                        ]
+                    }
+                }
+            });
         } catch (err) {
             const errMessage = createErrorMessage('setMatchupRosters', err);
             console.error(errMessage, err);
@@ -185,11 +196,11 @@ export const useFfService = create((set, get) => ({
     },
 
     setMatchupStats: async (team1 = null, team2 = null, week = null) => {
-        const { selectedLeague, selectedMatchup } = get();
+        const { selectedLeague, partialMatchup } = get();
         week = week ? week : selectedLeague.current_week;
         try {
-            const response1 = await ffService.getPlayerStats(selectedLeague, selectedMatchup.teams.team[0].roster, week);
-            const response2 = await ffService.getPlayerStats(selectedLeague, selectedMatchup.teams.team[1].roster, week);
+            const response1 = await ffService.getPlayerStats(selectedLeague, partialMatchup.teams.team[0].roster, week);
+            const response2 = await ffService.getPlayerStats(selectedLeague, partialMatchup.teams.team[1].roster, week);
     
             const updateRoster = (roster, response) => {
                 return roster.map(p => ({
@@ -198,21 +209,21 @@ export const useFfService = create((set, get) => ({
                 }));
             };
     
-            const updatedTeam1Roster = updateRoster(selectedMatchup.teams.team[0].roster, response1);
-            const updatedTeam2Roster = updateRoster(selectedMatchup.teams.team[1].roster, response2);
+            const updatedTeam1Roster = updateRoster(partialMatchup.teams.team[0].roster, response1);
+            const updatedTeam2Roster = updateRoster(partialMatchup.teams.team[1].roster, response2);
     
             set({
                 selectedMatchup: {
-                    ...selectedMatchup,
+                    ...partialMatchup,
                     teams: {
-                        ...selectedMatchup.teams,
+                        ...partialMatchup.teams,
                         team: [
                             {
-                                ...selectedMatchup.teams.team[0],
+                                ...partialMatchup.teams.team[0],
                                 roster: updatedTeam1Roster
                             },
                             {
-                                ...selectedMatchup.teams.team[1],
+                                ...partialMatchup.teams.team[1],
                                 roster: updatedTeam2Roster
                             }
                         ]
@@ -224,37 +235,65 @@ export const useFfService = create((set, get) => ({
             console.error(errMessage, err);
         }
     },
-
-    setSelectedRosterWeek: (week) => set({selectedRosterWeek: week}),
-    setSelectedMatchupWeek: (week) => set({selectedMatchupWeek: week}),
-    setIsShowingMatchups: (bool) => set({isShowingMatchups: bool}),
     
+    setRosterWeek: (week) => set({rosterWeek: week}),
+    setMatchupWeek: (week) => set({matchupWeek: week}),
+    setMatchupsWeek: (week) => set({matchupsWeek: week}),
+    setIsShowingMatchups: (bool) => set({isShowingMatchups: bool}),
+    setSelectedLeague: (league) => set({selectedLeague: league}),
+
     setInitialAppData: async () => {
         set({isLoading: true});
+        const state = get();
         try {
             await get().setLeagues();
             await get().setTeams();
             await get().setTeamPoints();
             await get().setTeamRoster();
             await get().setTeamStats();
-            await get().setLeagueMatchups();
-            await get().setTeamMatchups();
-            await get().setMatchupRosters();
-            await get().setMatchupStats();
         } catch (error) {
-            console.error('Error in setInitialAppData:', error);
+            console.error('Error in setInitialAppData:', error, {...state});
         } finally {
             set({isLoading: false})
         }
     },
-    
+
+    setRosterPage: async () => {
+        set({isLoading: true});
+        const state = get();
+        try {
+            await get().setTeams();
+            await get().setTeamPoints();
+            await get().setTeamRoster();
+            await get().setTeamStats();
+        } catch (error) {
+            console.error('Error in setRosterPage:', error, {...state} );
+        } finally {
+            set({isLoading: false});
+        }
+    },
+
+    setMatchupPage: async () => {
+        set({isLoading: true});
+        const state = get();
+        try {
+            await get().setTeamMatchups();
+            await get().setMatchupRosters();
+            await get().setMatchupStats();
+        } catch (error) {
+            console.error('Error in setMatchupPage:', error, {...state} );
+        } finally {
+            set({isLoading: false});
+        }
+    },
+
     updateRosterPageWeek: async (week) => {
         set({isLoading: true});
         try {
             await get().setTeamRoster(week);
             await get().setTeamStats(week);
             await get().setTeamPoints(week);
-            await get().setSelectedRosterWeek(week);
+            await get().setRosterWeek(week);
         } catch (error) {
             console.error('Error in updateRosterPageWeek:', error);
         } finally {
@@ -269,7 +308,7 @@ export const useFfService = create((set, get) => ({
             await get().setTeamMatchups(week);
             await get().setMatchupRosters(null, week);
             await get().setMatchupStats(null, null, week);
-            await get().setSelectedMatchupWeek(week);
+            await get().setMatchupWeek(week);
         } catch (error) {
             console.error('Error in updateMatchupPageWeek:', error);
         } finally {
@@ -281,6 +320,7 @@ export const useFfService = create((set, get) => ({
         set({isUpdating: true});
         try {
             await get().setLeagueMatchups(week);
+            // await get().setMatchupsWeek(week);
         } catch (error) {
             console.error('Error in updateMatchups:', error);
         } finally {
@@ -350,6 +390,28 @@ export const useFfService = create((set, get) => ({
         } catch (err) {
             const errMessage = createErrorMessage('getPlayerStats', err);
             console.error(errMessage, err);
+        }
+    },
+
+    updateSelectedLeague: async (league) => {
+        set({isUpdating: true});
+        try {
+            console.log('before clearing state', get());
+            get().clearStates();
+            console.log('after clearing state', get());
+            get().setSelectedLeague(league);
+            console.log('after updating selected league', get())
+            await get().setTeams();
+            await get().setTeamPoints();
+            await get().setTeamRoster();
+            await get().setTeamStats();
+            console.log('after setting teams data', get());
+
+        } catch (err) {
+            const errMessage = createErrorMessage('updateSelectedLeague', err, { league });
+            console.error(errMessage, err);
+        } finally {
+            set({isUpdating: false});
         }
     },
 

@@ -1,5 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
-
+import React, { useState, createContext, useContext, useCallback } from 'react';
 import { FullScreenModal } from '../components';
 
 const ModalContext = createContext(null);
@@ -12,8 +11,9 @@ export const ModalProvider = ({ children }) => {
     const [backButton, setBackButton] = useState(null);
     const [direction, setDirection] = useState(null);
     const [key, setKey] = useState(0);
+    const [closeCallback, setCloseCallback] = useState(() => () => {});
 
-    const openModal = ( { content, backButton, direction } ) => {
+    const openModal = ({ content, backButton, direction }) => {
         setContent(content);
         setDirection(direction);
         setBackButton(backButton);
@@ -21,8 +21,17 @@ export const ModalProvider = ({ children }) => {
         setIsOpen(true);
     };
 
+    const closeModal = useCallback(() => {
+        closeCallback();
+        setIsOpen(false);
+    }, [closeCallback]);
+
+    const setCloseModalCallback = useCallback((callback) => {
+        setCloseCallback(() => callback);
+    }, []);
+
     return (
-        <ModalContext.Provider value={{ openModal }}>
+        <ModalContext.Provider value={{ isOpen, openModal, closeModal, setCloseModalCallback }}>
             {children}
             <FullScreenModal
                 key={`${key}-${direction}`} 
@@ -30,6 +39,8 @@ export const ModalProvider = ({ children }) => {
                 setIsOpen={setIsOpen} 
                 direction={direction}
                 backButton={backButton}
+                closeModal={closeModal}
+                setCloseModalCallback={setCloseModalCallback}
             >
                 {content}
             </FullScreenModal>

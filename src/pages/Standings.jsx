@@ -3,35 +3,29 @@ import axios from 'axios';
 import { Box, Button, CircularProgress, Typography, useTheme } from '@mui/material';
 import { FiChevronRight } from 'react-icons/fi';
 
+import { DarkScreenLoading } from '../components';
+
 import { useFfService } from '../hooks';
 
-export const Standings = ({league}) => {
+export const Standings = () => {
  
     const ffService = useFfService();
     const theme = useTheme();
-    const [standings, setStandings] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    console.log(theme,'themeee', league,'leagueeee')
-    const getStandings = async () => {
-        setIsLoading(true);
-        try {
-            const response = await axios.get(`https://localhost:8000/api/v1/leagues/${league.league_key}/standings`);
-            console.log(response.data.standings,'standigns')
-            setStandings(response.data.standings);
-        } catch (error) {
-            console.error('Error trying to get standings.', error);
-            throw error;
-        } finally {
-            setIsLoading( false );
-        }
-
-    };
    
-    useEffect(() => {
-        getStandings();
-    }, [league] );
+    // useEffect(() => {
+    //     if(!ffService.selectedLeague && !ffService.isUpdating) {
+    //         console.log('calling setInitialAppData from inside Standings page');
+    //         ffService.setInitialAppData();
+    //     } else {
+    //         console.log(ffService.isUpdating);
+    //         console.log(ffService);
+    //     }
+    // }, [ffService] );
 
-    if(isLoading) return <Box sx={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center'}}><CircularProgress/></Box>
+    // if(ffService.isUpdating) return <Box sx={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center'}}><CircularProgress/></Box>
+   
+    if(ffService.isUpdating || ffService.selectedLeague.teams.team) return <DarkScreenLoading isLoading={ffService.isUpdating}/>;
+    
     return (
         <Box sx={{display: 'flex', flexDirection: 'column', width: '100%'}}>
             <Box sx={{display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'end'}}>
@@ -39,7 +33,7 @@ export const Standings = ({league}) => {
                 <Button sx={{alignItmes: 'end'}}>View all <FiChevronRight/></Button>
             </Box>
             <Box sx={{display: 'flex', flexDirection: 'column', width: '100%'}}>
-                {standings.map((team, idx) => <Box key={idx} sx={{display: 'flex', gap: 2}}>
+                {ffService.selectedLeague.teams.map(team => <Box key={team.team_key} sx={{display: 'flex', gap: 2}}>
                         <p>{team.team_standings.rank}</p>
                         <Box p={1} alignItems='center' justifyContent='center'>
 
@@ -52,7 +46,7 @@ export const Standings = ({league}) => {
                                 }}
                             />
                         </Box>
-                <p>{team.name}</p>
+                        <p>{team.name}</p>
                         <p>{team.team_standings.outcome_totals.wins}
                             -{team.team_standings.outcome_totals.losses}
                             -{team.team_standings.outcome_totals.ties}

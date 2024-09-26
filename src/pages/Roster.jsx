@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Badge, Box, Button, CircularProgress, Typography } from '@mui/material';
 import { FiChevronDown } from 'react-icons/fi';
 import { SelectWeekButtonGroup } from '../components';
-import { useAuth, useFfService } from '../hooks';
+import { useFfService } from '../hooks';
 
 const Header = () => {
     const ffService = useFfService();
@@ -53,7 +53,7 @@ const Header = () => {
                 width: '100%',
                 gap: 3,
             }}>
-                <SelectWeekButtonGroup selectedWeek={+ffService.selectedRosterWeek} setSelectedWeek={async (week) => await ffService.updateRosterPageWeek(week)}/>
+                <SelectWeekButtonGroup selectedWeek={+ffService.rosterWeek} setSelectedWeek={async (week) => await ffService.updateRosterPageWeek(week)}/>
                 <Button 
                     variant="outlined"
                     sx={{
@@ -181,10 +181,11 @@ export const Roster = () => {
     const ffService = useFfService();
 
     useEffect(() => {
-        if(!ffService.selectedRosterWeek) ffService.setInitialAppData();
+        if(!ffService.rosterWeek) ffService.setRosterPage();
+        else console.log(ffService,'inside of roster page')
     }, [ffService]);
 
-    if(ffService.isLoading) return (
+    if(ffService.isLoading || !ffService.selectedTeam.roster) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <CircularProgress/>
         </Box>
@@ -216,7 +217,7 @@ export const Roster = () => {
                 <Box sx={{display: 'flex', width: '100%', backgroundColor: 'gray', justifyContent: 'start', paddingX: 2.5, paddingY: 0.5}}>
                     <Typography fontSize={12} color='white' textTransform='uppercase'>Offense</Typography>
                 </Box>
-                {ffService.selectedTeam.roster.map((player, index) => (
+                {ffService.selectedTeam?.roster.map((player, index) => (
                     <PlayerCard key={index} player={player} />
                 ))}
             </Box>

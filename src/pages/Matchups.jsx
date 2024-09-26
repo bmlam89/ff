@@ -9,7 +9,6 @@ import { useFfService, useModal } from '../hooks';
 export const Matchups = () => {
     const ffService = useFfService();
     const { openModal } = useModal();
-    const [localSelectedWeek, setLocalSelectedWeek] = useState(ffService.selectedMatchupWeek);
 
     const getTeamRecord = (team) => {
         const data = ffService.selectedLeague.teams.find(t => t.team_key === team.team_key);
@@ -17,22 +16,18 @@ export const Matchups = () => {
     };
 
     useEffect(() => {
-        if (!ffService.selectedLeague) ffService.setInitialAppData();
-    }, [ffService]);
+        ffService.updateMatchups(ffService.matchupsWeek);
+    }, [ffService.matchupsWeek]);
 
-    useEffect(() => {
-        ffService.updateMatchups(localSelectedWeek);
-    }, [localSelectedWeek]);
-
-    if(ffService.isUpdating) return (
+    if(!ffService.selectedLeague.matchups || ffService.isUpdating) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <MatchupsSkeleton/>
         </Box>
     );
 
     const renderMatchupDetails = async (matchup) => {
-        let updatedMatchup = await ffService.getMatchupRosters(matchup, localSelectedWeek);
-        updatedMatchup = await ffService.getMatchupStats(updatedMatchup, localSelectedWeek);
+        let updatedMatchup = await ffService.getMatchupRosters(matchup, ffService.matchupsWeek);
+        updatedMatchup = await ffService.getMatchupStats(updatedMatchup, ffService.matchupsWeek);
         openModal({
             content: <MatchupDetails selectedMatchup={updatedMatchup}/>, 
             direction: 'right',
@@ -42,16 +37,16 @@ export const Matchups = () => {
     
     return (
         <Box sx={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
-            {ffService.selectedLeague?.matchups && (
+            {ffService.selectedLeague.matchups && (
             <Stack gap={3} sx={{ flexGrow: 1, overflow: 'auto', paddingX: 3, paddingY: 2 }}>
                     <Box sx={{ paddingY: 0.5 }}>
                         <SelectWeekButtonGroup 
-                            selectedWeek={+localSelectedWeek} 
-                            setSelectedWeek={(week) => setLocalSelectedWeek(week)}
+                            selectedWeek={+ffService.matchupsWeek} 
+                            setSelectedWeek={(week) => ffService.setMatchupsWeek(week)}
                         />
                     </Box>
                     <Stack gap={4}>
-                        {ffService.selectedLeague?.matchups.map((match, idx) => (
+                        {ffService.selectedLeague.matchups.map((match, idx) => (
                             <Button 
                                 key={idx} 
                                 sx={{ display: 'block', width: '100%', textAlign: 'left', padding: 0 }}

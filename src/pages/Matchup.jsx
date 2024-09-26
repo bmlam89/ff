@@ -31,7 +31,7 @@ const Header = ({matchup, hideButton}) => {
             <ProjectionsAndWinProbability teams={teams.team} />
             <Box sx={{display: 'flex', gap: 2.5, width: 'fit'}}>
                 {!hideButton && <>
-                    <SelectWeekButtonGroup selectedWeek={+ffService.selectedMatchupWeek} setSelectedWeek={(week) => ffService.updateMatchupPageWeek(week)}/> 
+                    <SelectWeekButtonGroup selectedWeek={+ffService.matchupWeek} setSelectedWeek={(week) => ffService.updateMatchupPageWeek(week)}/> 
                     <Button 
                         sx={{
                             display: 'flex', 
@@ -52,7 +52,7 @@ const Header = ({matchup, hideButton}) => {
     );
 };
 
-export const TeamNames = ({ teams }) => (
+const TeamNames = ({ teams }) => (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
         {teams.map((team, index) => (
             <Typography key={index} fontSize={12}>{team.name}</Typography>
@@ -60,7 +60,7 @@ export const TeamNames = ({ teams }) => (
     </Box>
 );
 
-export const ScoreAndLogos = ({ teams }) => (
+const ScoreAndLogos = ({ teams }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
         <TeamLogo url={teams[0].team_logos.team_logo.url} />
         <ScoreDisplay teams={teams} />
@@ -68,11 +68,11 @@ export const ScoreAndLogos = ({ teams }) => (
     </Box>
 );
 
-export const TeamLogo = ({ url }) => (
+const TeamLogo = ({ url }) => (
     <img src={url} style={{ width: '48px', height: '48px', borderRadius: '50%' }} alt="Team Logo" />
 );
 
-export const ScoreDisplay = ({ teams }) => (
+const ScoreDisplay = ({ teams }) => (
     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0.5 }}>
         <Typography fontSize={32}>{teams[0].team_points.total}</Typography>
         <Typography sx={{ fontSize: 16, color: 'gray', fontWeight: 600 }}>/</Typography>
@@ -80,7 +80,7 @@ export const ScoreDisplay = ({ teams }) => (
     </Box>
 );
 
-export const ProjectionsAndWinProbability = ({ teams }) => (
+const ProjectionsAndWinProbability = ({ teams }) => (
     <Box sx={{ display: 'flex', width: '100%', justifyContent: 'center', alignItems: 'center', gap: 2 }}>
         <TeamProjection team={teams[0]} align="start" />
         <ProjectionLabels />
@@ -88,21 +88,21 @@ export const ProjectionsAndWinProbability = ({ teams }) => (
     </Box>
 );
 
-export const TeamProjection = ({ team, align }) => (
+const TeamProjection = ({ team, align }) => (
     <Stack sx={{ alignItems: align }}>
         <Typography fontSize={12}>{team.team_projected_points.total}</Typography>
         <Typography fontSize={12}>{parseInt(team.win_probability * 100)}%</Typography>
     </Stack>
 );
 
-export const ProjectionLabels = () => (
+const ProjectionLabels = () => (
     <Stack sx={{ alignItems: 'center', justifyContent: 'center' }}>
         <Typography fontSize={12}>Live Projected</Typography>
         <Typography fontSize={12}>Win %</Typography>
     </Stack>
 );
 
-export const PlayerInfo = ({ player, align }) => (
+const PlayerInfo = ({ player, align }) => (
     <Box sx={{ 
         display: 'flex', 
         justifyContent: 'space-between',
@@ -123,7 +123,7 @@ export const PlayerInfo = ({ player, align }) => (
     </Box>
 );
 
-export const PlayerDetails = ({ player, align }) => (
+const PlayerDetails = ({ player, align }) => (
     <Stack sx={{ alignItems: align === 'right' ? 'flex-end' : 'flex-start' }}>
         <Typography fontSize={12}>
             {player.name.first[0]}. {player.name.last}
@@ -134,7 +134,7 @@ export const PlayerDetails = ({ player, align }) => (
     </Stack>
 );
 
-export const PlayerPoints = ({ points }) => (
+const PlayerPoints = ({ points }) => (
     <Stack justifyContent='center'>
         <Typography fontSize={14}>
             {points}
@@ -142,7 +142,7 @@ export const PlayerPoints = ({ points }) => (
     </Stack>
 );
 
-export const PositionBox = ({ position }) => (
+const PositionBox = ({ position }) => (
     <Box sx={{
         paddingX: 2,
         paddingY: 1,
@@ -163,13 +163,13 @@ export const Matchup = ({selectedMatchup, hideButton}) => {
     const [matchup, setMatchup] = useState(selectedMatchup);
     
     useEffect(() => {
-        if(!ffService.selectedMatchupWeek && !matchup) ffService.setInitialAppData();
-        else if(!matchup) setMatchup(ffService.selectedMatchup);
-    }, [ffService.selectedMatchupWeek]);
+        if(!matchup && !ffService.selectedMatchup) ffService.setMatchupPage();
+        else if(ffService.selectedMatchup) setMatchup(ffService.selectedMatchup);
+    }, [ffService]);
 
     const POSITIONS = ['QB', 'WR', 'RB', 'TE', 'W/R/T', 'K', 'DEF', 'BN'];
 
-    if (ffService.isLoading || !matchup) return (
+    if (!matchup) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <CircularProgress />
         </Box>

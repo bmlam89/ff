@@ -8,7 +8,7 @@ import { useAuth, useFfService } from './hooks';
 export const App = () => {
     const authService = useAuth();
     const ffService = useFfService();
-
+    authService.setIsLoading(true);
     useEffect(() => {
         if(authService.isLoading) authService.setYahooAuthStatus();
         else ffService.setInitialAppData();
@@ -38,7 +38,7 @@ export const App = () => {
             height: '100vh',
             overflow: 'hidden'
         }}>
-            {authService.hasYahooAuth && !ffService.isLoading && <TopNavbar />}
+            {authService.hasYahooAuth && ffService.selectedLeague?.teams && <TopNavbar />}
             
             <Box
                 component="main"
@@ -57,13 +57,13 @@ export const App = () => {
                         <Route path="/" element={<Roster />} />
                         <Route path="/matchup" element={<Matchup />} />
                         <Route path="/players" element={<Players />} />  
-                        <Route path="/leagues/:leagueKey" element={<Standings />} /> 
+                        <Route path="/leagues/:key/standings" element={<Standings />} /> 
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 )}
             </Box>
             
-            {authService.hasYahooAuth && !ffService.isLoading && <BottomNavbar />}
+            {authService.hasYahooAuth && ffService.selectedLeague?.teams && <BottomNavbar />}
         </Box>
     );
 };
