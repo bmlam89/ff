@@ -151,10 +151,15 @@ export const useFfService = create((set, get) => ({
     },
 
     setTeamMatchups: async (week = null) => {
-        const { selectedLeague, selectedTeam } = get();
+        let { selectedLeague, selectedTeam } = get();
+        if(!selectedTeam) {
+            await ffService.setTeams();
+            ({ selectedTeam } = get());
+        }
         week = week ? String(week) : selectedLeague.current_week;
         try {
             const response = await ffService.getTeamMatchups(selectedTeam, week);
+            console.log(response,'response inside of setTeamMatchups');
             set({selectedTeam: {
                     ...selectedTeam,
                     matchups: response.data.fantasy_content.team.matchups.matchup,
@@ -177,6 +182,7 @@ export const useFfService = create((set, get) => ({
         try {
             for(let i = 0; i < teams.length; i++) {
                 const response = await ffService.getRoster(teams[i], week);
+                console.log(response,'response inside of setMatchupRosters');
                 rosters.push(response.data.fantasy_content.team.roster.players.player);
             }
             set({partialMatchup: {
@@ -201,7 +207,6 @@ export const useFfService = create((set, get) => ({
         try {
             const response1 = await ffService.getPlayerStats(selectedLeague, partialMatchup.teams.team[0].roster, week);
             const response2 = await ffService.getPlayerStats(selectedLeague, partialMatchup.teams.team[1].roster, week);
-    
             const updateRoster = (roster, response) => {
                 return roster.map(p => ({
                     ...p,
@@ -233,6 +238,8 @@ export const useFfService = create((set, get) => ({
         } catch (err) {
             const errMessage = createErrorMessage('getPlayerStats', err);
             console.error(errMessage, err);
+        } finally {
+            console.log(get(), 'state after setMatchupStats');
         }
     },
     
@@ -290,7 +297,6 @@ export const useFfService = create((set, get) => ({
     setStandingsPage: async (league) => {
         set({isUpdating: true});
         try {
-            console.log('before clearing state', get());
             get().clearStates();
             console.log('after clearing state', get());
             get().setSelectedLeague(league);

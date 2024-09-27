@@ -102,26 +102,52 @@ const ProjectionLabels = () => (
     </Stack>
 );
 
-const PlayerInfo = ({ player, align }) => (
-    <Box sx={{ 
-        display: 'flex', 
-        justifyContent: 'space-between',
-        width: '100%', 
-        paddingX: 2.5 
-    }}>
-        {align === 'left' ? (
-            <>
-                <PlayerDetails player={player} align={align} />
-                <PlayerPoints points={player.player_points.total} />
-            </>
-        ) : (
-            <>
-                <PlayerPoints points={player.player_points.total} />
-                <PlayerDetails player={player} align={align} />
-            </>
-        )}
-    </Box>
-);
+const PlayerInfo = ({ player, align }) => {
+    const renderEmptySlot = () => (
+        <Box sx={{ 
+            display: 'flex',
+            minHeight: 38,
+            alignItems: 'center',
+            width: '100%',
+            paddingX: 2.5,
+            backgroundColor: '#d4d6d2'
+        }}>
+            <Stack sx={{ alignItems: align === 'left' ? 'flex-start' : 'flex-end', height: '100%', width: '100%'}}>
+                <Typography sx={{
+                    fontSize: 15,
+                    textTransform: 'uppercase',
+                    color: '#4d4a4c',
+                    fontWeight: 600,
+                }}>
+                    Empty
+                </Typography>
+            </Stack>
+            
+                
+        </Box>
+    );
+
+    if (!player) return renderEmptySlot();
+    return (
+        <Box sx={{ 
+            display: 'flex', 
+            justifyContent: 'space-between',
+            width: '100%', 
+            paddingX: 2.5 
+        }}>
+            { align === 'left' 
+                ? <>
+                    <PlayerDetails player={player} align={align} />
+                    <PlayerPoints points={player.player_points.total} />
+                </>
+                : <>
+                    <PlayerPoints points={player.player_points.total} />
+                    <PlayerDetails player={player} align={align} />
+                </>
+            }
+        </Box>
+    );
+};
 
 const PlayerDetails = ({ player, align }) => (
     <Stack sx={{ alignItems: align === 'right' ? 'flex-end' : 'flex-start' }}>
@@ -158,29 +184,46 @@ const PositionBox = ({ position }) => (
     </Box>
 );
 
-export const Matchup = ({selectedMatchup, hideButton}) => {
+export const Matchup = ({ selectedMatchup, hideButton }) => {
     const ffService = useFfService();
     const [matchup, setMatchup] = useState(selectedMatchup);
     
     useEffect(() => {
-        if(!matchup && !ffService.selectedMatchup) ffService.setMatchupPage();
-        else if(ffService.selectedMatchup) setMatchup(ffService.selectedMatchup);
+        if (!matchup && !ffService.selectedMatchup) ffService.setMatchupPage();
+        else if (ffService.selectedMatchup) setMatchup(ffService.selectedMatchup);
     }, [ffService.selectedMatchup]);
 
-    const POSITIONS = ['QB', 'WR', 'RB', 'TE', 'W/R/T', 'K', 'DEF', 'BN'];
+    if (!matchup || !matchup.teams || !matchup.teams?.team || !matchup.teams?.team[0]?.roster) return <BasicLoading />;
 
-    if (!matchup || !matchup.teams || !matchup.teams?.team || !matchup.teams?.team[0]?.roster) return <BasicLoading/>
+    const POSITIONS = ['QB', 'WR', 'RB', 'TE', 'W/R/T', 'K', 'DEF', 'BN', 'IR'];
 
-    const mapPlayersByPosition = (roster) => {
-        const mappedPlayers = {};
-        POSITIONS.forEach(position => {
-            mappedPlayers[position] = roster.filter(player => player.selected_position.position === position);
-        });
-        return mappedPlayers;
+    const getLineup = (team) => {
+        return POSITIONS.reduce((acc, position) => {
+            acc[position] = team.roster.filter(player => player.selected_position.position === position);
+            return acc;
+        }, {});
     };
 
-    const playersByPosition1 = mapPlayersByPosition(matchup.teams.team[0].roster);
-    const playersByPosition2 = mapPlayersByPosition(matchup.teams.team[1].roster);
+    const myTeam = matchup.teams.team[0].is_owned_by_current_login ? matchup.teams.team[0] : matchup.teams.team[1];
+    const opposingTeam = matchup.teams.team[0].is_owned_by_current_login ? matchup.teams.team[1] : matchup.teams.team[0];
+
+    const myLineup = getLineup(myTeam);
+    const opposingLineup = getLineup(opposingTeam);
+
+    const renderPositionRows = (position) => {
+        const maxPlayers = position === 'WR' || position === 'RB' ? 2 : 1;
+        const rows = [];
+        for (let i = 0; i < maxPlayers; i++) {
+            rows.push(
+                <Box key={`${position}-${i}`} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <PlayerInfo player={myLineup[position][i]} align="left" />
+                    <PositionBox position={position} />
+                    <PlayerInfo player={opposingLineup[position][i]} align="right" />
+                </Box>
+            );
+        }
+        return rows;
+    };
 
     return (
         <Box sx={{
@@ -201,24 +244,23 @@ export const Matchup = ({selectedMatchup, hideButton}) => {
                 },
             }}>
                 <Stack sx={{gap: 1}}>
-                    <Header matchup={ matchup } hideButton={hideButton}/>
+                    <Header matchup={matchup} hideButton={hideButton}/>
                 </Stack>
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
-                    {POSITIONS.map(position => (
-                        <Box key={position}>
-                            {playersByPosition1[position].map((player, index) => {
-                                const opposingPlayer = playersByPosition2[position][index];
-                                return (
-                                    <Box key={`${position}-${index}`} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <PlayerInfo player={player} align="left" />
-                                        <PositionBox position={position} />
-                                        <PlayerInfo player={opposingPlayer} align="right" />
-                                    </Box>
-                                );
-                            })}
-                        </Box>
-                    ))}
+                    {POSITIONS.map((position) => {
+                        if (position === 'BN' || position === 'IR') {
+                            return myLineup[position].map((_, index) => (
+                                <Box key={`${position}-${index}`} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <PlayerInfo player={myLineup[position][index]} align="left" />
+                                    <PositionBox position={position} />
+                                    <PlayerInfo player={opposingLineup[position][index]} align="right" />
+                                </Box>
+                            ));
+                        } else {
+                            return renderPositionRows(position);
+                        }
+                    })}
                 </Box>
             </Box>
         </Box>

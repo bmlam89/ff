@@ -182,7 +182,7 @@ export const Roster = () => {
 
     useEffect(() => {
         if(!ffService.rosterWeek) ffService.setRosterPage();
-        else console.log(ffService,'inside of roster page')
+        else console.log(ffService,'inside of roster page');
     }, [ffService]);
 
     if(ffService.isLoading || !ffService.selectedTeam.roster) return <BasicLoading/>
