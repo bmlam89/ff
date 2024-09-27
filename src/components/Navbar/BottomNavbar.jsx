@@ -106,8 +106,13 @@ export const BottomNavbar = () => {
     };
 
     useEffect(() => {
+        const path = location.pathname;
+        if( path === '/') setSelectedNavOption(navOptions[0]);
+        else if ( path === '/matchup' ) setSelectedNavOption(navOptions[1]);
+        else if ( path === '/players' ) setSelectedNavOption(navOptions[2]);
+        else setSelectedNavOption(navOptions[3]);
 
-        if(!isOpen && previousNavOption) {//resetting nav to previous option if user opened leagues but didn't select a league
+        if(!isOpen && previousNavOption) {//resetting nav to previous option if user opened leagues
             setPreviousNavOption(null);
             setSelectedNavOption(previousNavOption);
         }
@@ -121,8 +126,8 @@ export const BottomNavbar = () => {
         if( selectedNavOption.name !== 'Matchup' && isModalOpen ) {//closes modal only when active nav isn't Matchup
             closeModal() 
         }
+    }, [ isOpen, selectedNavOption, location.pathname]);
 
-    }, [ isOpen, selectedNavOption]);
 
     
     return (

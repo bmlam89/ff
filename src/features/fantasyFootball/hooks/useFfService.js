@@ -397,9 +397,9 @@ export const useFfService = create((set, get) => ({
         set({isUpdating: true});
         try {
             console.log('before clearing state', get());
-            get().clearStates();
+            await get().clearStates();
             console.log('after clearing state', get());
-            get().setSelectedLeague(league);
+            await get().setSelectedLeague(league);
             console.log('after updating selected league', get())
             await get().setTeams();
             await get().setTeamPoints();

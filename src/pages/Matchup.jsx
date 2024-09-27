@@ -165,11 +165,11 @@ export const Matchup = ({selectedMatchup, hideButton}) => {
     useEffect(() => {
         if(!matchup && !ffService.selectedMatchup) ffService.setMatchupPage();
         else if(ffService.selectedMatchup) setMatchup(ffService.selectedMatchup);
-    }, [ffService]);
+    }, [ffService.selectedMatchup]);
 
     const POSITIONS = ['QB', 'WR', 'RB', 'TE', 'W/R/T', 'K', 'DEF', 'BN'];
 
-    if (!matchup) return (
+    if (!matchup || !matchup.teams || !matchup.teams?.team || !matchup.teams?.team[0]?.roster) return (
         <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
             <CircularProgress />
         </Box>

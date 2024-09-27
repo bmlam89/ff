@@ -26,8 +26,13 @@ export const Matchups = () => {
     );
 
     const renderMatchupDetails = async (matchup) => {
+<<<<<<< Updated upstream
         let updatedMatchup = await ffService.getMatchupRosters(matchup, ffService.matchupsWeek);
         updatedMatchup = await ffService.getMatchupStats(updatedMatchup, ffService.matchupsWeek);
+=======
+        let updatedMatchup = await ffService.getMatchupRosters(matchup, localSelectedWeek);
+        updatedMatchup = await ffService.getMatchupStats(updatedMatchup, localSelectedWeek);
+>>>>>>> Stashed changes
         openModal({
             content: <MatchupDetails selectedMatchup={updatedMatchup}/>, 
             direction: 'right',
@@ -112,8 +117,14 @@ const BackButton = () => {
             color="inherit"
             onClick={renderMatchups}
             aria-label="back"
+<<<<<<< Updated upstream
         >
             <FiChevronLeft color='#FFFFFF'/>
+=======
+            sx={{position: 'absolute', top: 2, left: 2.5, zIndex: 1300}}
+        >
+            <FiChevronLeft color='#FFFFFF' width={24} height={24}/>
+>>>>>>> Stashed changes
         </IconButton>
     )
 };
