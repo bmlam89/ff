@@ -1,4 +1,5 @@
 export { Header } from './Header/Header';
+export { BasicLoading } from './Loading/BasicLoading';
 export { DarkScreenLoading } from './Loading/DarkScreenLoading';
 export { MatchupsSkeleton } from './Skeleton/MatchupsSkeleton';
 export { FullScreenModal } from './Modal/FullScreenModal';

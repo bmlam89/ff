@@ -20,7 +20,7 @@ export const TopNavbar = () => {
         <AppBar position='fixed' color='primary' sx={{ top: 0, bottom: 'auto' }}>
             <Box sx={{display: 'flex', flexDirection: 'column', width: '100%', alignItems: 'center', justifyContent: 'center'}}>
                 <Typography variant='h6'>{header}</Typography>
-                <Typography variant='p'>{ffService?.selectedLeague?.name}</Typography>
+                <Typography variant='p'>{ffService.selectedLeague.name}</Typography>
             </Box>
         </AppBar>
     );

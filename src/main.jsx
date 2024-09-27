@@ -11,6 +11,8 @@ const theme = createTheme({
     palette: {
         primary: {
             main: '#4847DF',
+            dark: '#3837B2', // This is approximately 20% darker than the main color
+            light: '#6A69E5', // You might want to add this for consistency
         },
     },
 });

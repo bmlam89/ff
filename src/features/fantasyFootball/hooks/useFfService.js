@@ -287,6 +287,24 @@ export const useFfService = create((set, get) => ({
         }
     },
 
+    setStandingsPage: async (league) => {
+        set({isUpdating: true});
+        try {
+            console.log('before clearing state', get());
+            get().clearStates();
+            console.log('after clearing state', get());
+            get().setSelectedLeague(league);
+            await get().setTeams();
+
+        } catch (err) {
+            const errMessage = createErrorMessage('setStandingsPage', err, { league });
+            console.error(errMessage, err);
+        } finally {
+            set({isUpdating: false});
+            console.log('after updating all data', get());
+        }
+    },
+
     updateRosterPageWeek: async (week) => {
         set({isLoading: true});
         try {
@@ -397,21 +415,21 @@ export const useFfService = create((set, get) => ({
         set({isUpdating: true});
         try {
             console.log('before clearing state', get());
-            await get().clearStates();
+            get().clearStates();
             console.log('after clearing state', get());
-            await get().setSelectedLeague(league);
-            console.log('after updating selected league', get())
+            get().setSelectedLeague(league);
             await get().setTeams();
             await get().setTeamPoints();
             await get().setTeamRoster();
             await get().setTeamStats();
-            console.log('after setting teams data', get());
 
         } catch (err) {
             const errMessage = createErrorMessage('updateSelectedLeague', err, { league });
             console.error(errMessage, err);
         } finally {
             set({isUpdating: false});
+            console.log('after updating all data', get());
+
         }
     },
 

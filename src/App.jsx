@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Box } from '@mui/material';
-import { TopNavbar, BottomNavbar, DarkScreenLoading } from './components';
+import { BasicLoading, TopNavbar, BottomNavbar } from './components';
 import { Login, Roster, Matchup, Players, Standings } from './pages';
 import { useAuth, useFfService } from './hooks';
 
@@ -15,12 +15,8 @@ export const App = () => {
     }, [authService.isLoading]);
 
     useEffect(() => {
-        if(!ffService.isLoading) console.log(ffService,'ffService');
-    }, [ffService.isLoading]);
-
-    if (authService.isLoading) {
-        return <DarkScreenLoading isLoading={authService.isLoading} />;
-    }
+        console.log(ffService,'ffService');
+    }, []);
 
     if (!authService.hasYahooAuth) {
         return (
@@ -50,17 +46,17 @@ export const App = () => {
                     paddingY: '56px',
                 }}
             >
-                {ffService.isLoading ? (
-                    <DarkScreenLoading isLoading={true} />
-                ) : (
-                    <Routes>
-                        <Route path="/" element={<Roster />} />
-                        <Route path="/matchup" element={<Matchup />} />
-                        <Route path="/players" element={<Players />} />  
-                        <Route path="/leagues/:key/standings" element={<Standings />} /> 
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
-                )}
+
+                { ffService.isLoading 
+                    ? <BasicLoading/>
+                    : <Routes>
+                            <Route path="/" element={<Roster />} />
+                            <Route path="/matchup" element={<Matchup />} />
+                            <Route path="/players" element={<Players />} />  
+                            <Route path="/leagues/:key/standings" element={<Standings />} /> 
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                }
             </Box>
             
             {authService.hasYahooAuth && ffService.selectedLeague?.teams && <BottomNavbar />}

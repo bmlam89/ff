@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { AppBar, Backdrop, Box, Button, Grow, IconButton, Toolbar, Typography, Divider } from '@mui/material';
+import { AppBar, Backdrop, Box, Button, Grow, IconButton, Toolbar, Typography, Divider, useTheme } from '@mui/material';
 import { HiOutlineTrophy, HiTrophy, HiOutlineUserGroup, HiUserGroup } from 'react-icons/hi2';
 import { TbVs } from "react-icons/tb";
 import { RiUserSearchLine, RiUserSearchFill } from "react-icons/ri";
@@ -34,17 +34,19 @@ const StyledIconButton = styled(IconButton)(({ theme, selected }) => ({
     flex: 1,
     height: '100%',
     borderRadius: 0,
-    transition: 'all 0.3s',
     backgroundColor: theme.palette.primary.main,
-    boxShadow: selected ? 'inset 0 3px 10px 3px rgb(0 0 0 / 0.2);' : 'none',
-    
-
-    '&:hover': {
-        backgroundColor: selected ? theme.palette.primary.dark : theme.palette.primary.light,
+    color: selected ? '#F5F5F5' : '#FFFFFF',
+    boxShadow: selected 
+        ? 'inset 0 1px 0 0 rgba(255, 255, 255, 0.2), inset 0 -1px 0 0 rgba(0, 0, 0, 0.2), inset 1px 0 0 0 rgba(255, 255, 255, 0.2), inset -1px 0 0 0 rgba(0, 0, 0, 0.2), 0 0 10px 0 rgba(0, 0, 0, 0.1)'
+        : 'none',
+    zIndex: selected ? 1 : 'auto',
+    '& .MuiSvgIcon-root': {
+        fontSize: selected ? '1.3em' : '1.2em',
+        transition: 'all 0.3s',
     },
-    '&.Mui-disabled': {
-        color: 'inherit',
-        opacity: 1,
+    '& .MuiTypography-root': {
+        fontWeight: selected ? 'bold' : 'normal',
+        transition: 'all 0.3s',
     },
 }));
 
@@ -69,19 +71,24 @@ export const BottomNavbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
-
-    const updateSelectedLeague = (league) => {
-        ffService.updateSelectedLeague(league);
-        navigate(`/leagues/${league.league_key}/standings`);
+    const theme = useTheme();
+    
+    const updateSelectedLeague = async (league) => {
+        ffService.setStandingsPage(league);
         setPreviousNavOption(null);
         setIsOpen(false); 
+        navigate(`/leagues/${league.league_key}/standings`);
     };
 
     const handleNavigation = async (navOption) => {
-        console.log(navOption)
-        if(navOption.name !== 'Matchup' && isModalOpen) closeModal();
+        setSelectedNavOption(navOption);
 
-        if(navOption.name === 'Leagues') {
+        if(navOption.name !== 'Matchup' && isModalOpen) closeModal();
+        if(isOpen && navOption.name !== 'Leagues') {
+            setIsOpen(false);
+        }
+        if(navOption.name === 'Leagues' && ( selectedNavOption.name !== navOption.name || location.pathname.includes(navOption.path) ) ) {
+            console.log('inside leagues setting previous to', selectedNavOption);
             setIsOpen(!isOpen);
             setPreviousNavOption(selectedNavOption);
         } 
@@ -102,8 +109,20 @@ export const BottomNavbar = () => {
             navigate('/players');
         } 
     
-        setSelectedNavOption(navOption);
+        
     };
+
+    useEffect(() => {
+
+        if(!isOpen && previousNavOption) {//resetting nav to previous option if user opened leagues
+            setSelectedNavOption(previousNavOption);
+            setPreviousNavOption(null);
+        }
+
+        //closes modal only when active nav isn't Matchup
+        if( selectedNavOption.name !== 'Matchup' && isModalOpen ) closeModal();
+        
+    }, [ isOpen, selectedNavOption ]);
 
     useEffect(() => {
         const path = location.pathname;
@@ -111,28 +130,16 @@ export const BottomNavbar = () => {
         else if ( path === '/matchup' ) setSelectedNavOption(navOptions[1]);
         else if ( path === '/players' ) setSelectedNavOption(navOptions[2]);
         else setSelectedNavOption(navOptions[3]);
-
-        if(!isOpen && previousNavOption) {//resetting nav to previous option if user opened leagues
-            setPreviousNavOption(null);
-            setSelectedNavOption(previousNavOption);
-        }
-
-        // if(selectedNavOption.name === 'Matchup' && location.pathname === '/matchup' && !isModalOpen) {//handle showing matchups modal only when it's not open
-        //     openModal({
-        //         content: <Matchups/>, 
-        //         direction: 'up'
-        //     });
-        // }
-        if( selectedNavOption.name !== 'Matchup' && isModalOpen ) {//closes modal only when active nav isn't Matchup
-            closeModal() 
-        }
-    }, [ isOpen, selectedNavOption, location.pathname]);
-
+    }, [location.pathname]);
 
     
     return (
         <>
-            <Backdrop sx={(theme) => ({ color: '#fff', zIndex: theme.zIndex.drawer + 1 })}
+            <Backdrop sx={(theme) => ({ 
+                    backgroundColor: 'transparent',
+                    color: '#FFFFFF', 
+                    zIndex: theme.zIndex.drawer + 1 
+                })}
                 open={isOpen}
                 onClick={() => setIsOpen(false)}
             >
@@ -142,11 +149,11 @@ export const BottomNavbar = () => {
                             {ffService.leagues.map((league, lgIdx) => (
                                 <Box key={lgIdx} sx={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
                                     <Button onClick={() => updateSelectedLeague(league)}>
-                                        <Typography variant='p' sx={{ color: 'white', fontSize: 18 }}>
+                                        <Typography variant='p' sx={{ color: `${league.name === ffService.selectedLeague.name ? '#F5F5F5' : '#FFFFFF' }`, fontSize: 18 }}>
                                             {league.name}
                                         </Typography>
                                     </Button>
-                                    <img src={ffService.selectedTeam.team_logos.team_logo.url} alt="Team Logo" style={{ width: 48, height: 48 }} />
+                                    <img src={league.teams.team.team_logos.team_logo.url} alt="Team Logo" style={{ width: 48, height: 48 }} />
                                 </Box>
                             ))}
                         </StyledBox>
@@ -158,20 +165,23 @@ export const BottomNavbar = () => {
                     {navOptions.map((option, nIdx) => (
                         <React.Fragment key={`navbar-${nIdx}`}>
                             <StyledIconButton
-                                color='inherit'
                                 onClick={() => handleNavigation(option)}
-                                selected={selectedNavOption.name === option.name && !isOpen}
-                                sx={{color: `${selectedNavOption.name === option.name ? '#FFD700' : 'white' }`}}
+                                selected={selectedNavOption.name === option.name}
+                                sx={{ backgroundColor: theme.palette.primary.main }}
                             >
-                                {/* {(selectedNavOption.name === option.name && !isOpen) || (isOpen && option.name === 'Leagues') 
-                                    ? <option.FilledIcon /> 
-                                    : <option.OutlinedIcon/>
-                                } */}
                                 {(selectedNavOption.name === option.name) && (location.pathname.includes(selectedNavOption.path)) 
                                     ? <option.FilledIcon /> 
                                     : <option.OutlinedIcon/>
                                 }
-                                <Typography fontSize={12}>{option.name}</Typography>
+                                <Typography 
+                                    fontSize={12} 
+                                    sx={{
+                                        transition: 'font-weight 0.3s ease',
+                                        fontWeight: selectedNavOption.name === option.name ? 700 : 400,
+                                    }}
+                                >
+                                    {option.name}
+                                </Typography>
                             </StyledIconButton>
                             {nIdx < navOptions.length - 1 && (
                                 <StyledDivider orientation="vertical" flexItem />

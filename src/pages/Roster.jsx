@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Badge, Box, Button, CircularProgress, Typography } from '@mui/material';
+import { Badge, Box, Button, Typography } from '@mui/material';
 import { FiChevronDown } from 'react-icons/fi';
-import { SelectWeekButtonGroup } from '../components';
+import { BasicLoading, SelectWeekButtonGroup } from '../components';
 import { useFfService } from '../hooks';
 
 const Header = () => {
@@ -185,11 +185,7 @@ export const Roster = () => {
         else console.log(ffService,'inside of roster page')
     }, [ffService]);
 
-    if(ffService.isLoading || !ffService.selectedTeam.roster) return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <CircularProgress/>
-        </Box>
-    );
+    if(ffService.isLoading || !ffService.selectedTeam.roster) return <BasicLoading/>
 
     return (
         <Box 

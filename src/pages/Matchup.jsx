@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Stack, Typography } from '@mui/material';
+import { Box, Button, Stack, Typography } from '@mui/material';
 import { useFfService } from '../hooks';
-import { SelectWeekButtonGroup } from '../components';
+import { BasicLoading, SelectWeekButtonGroup } from '../components';
 import { Matchups } from './Matchups';
 
 import { useModal } from '../hooks';
@@ -169,11 +169,7 @@ export const Matchup = ({selectedMatchup, hideButton}) => {
 
     const POSITIONS = ['QB', 'WR', 'RB', 'TE', 'W/R/T', 'K', 'DEF', 'BN'];
 
-    if (!matchup || !matchup.teams || !matchup.teams?.team || !matchup.teams?.team[0]?.roster) return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-            <CircularProgress />
-        </Box>
-    );
+    if (!matchup || !matchup.teams || !matchup.teams?.team || !matchup.teams?.team[0]?.roster) return <BasicLoading/>
 
     const mapPlayersByPosition = (roster) => {
         const mappedPlayers = {};
