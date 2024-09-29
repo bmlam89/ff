@@ -26,10 +26,10 @@ const initialState = {
     rosterWeek: null,
     partialMatchup: null,
     selectedMatchup: null,
+    matchupDetails: null,
     matchupWeek: null,
     matchupsWeek: null,
     standings: null,
-
 };
 
 export const useFfService = create((set, get) => ({

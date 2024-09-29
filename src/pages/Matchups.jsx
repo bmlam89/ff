@@ -38,7 +38,7 @@ export const Matchups = () => {
     return (
         <Box sx={{ height: 'calc(100vh - 56px)', display: 'flex', flexDirection: 'column' }}>
             {ffService.selectedLeague.matchups && (
-            <Stack gap={3} sx={{ flexGrow: 1, overflow: 'auto', paddingX: 3, paddingY: 2 }}>
+            <Stack gap={3} sx={{ flexGrow: 1, paddingX: 3, paddingY: 2 }}>
                     <Box sx={{ paddingY: 0.5 }}>
                         <SelectWeekButtonGroup 
                             selectedWeek={+ffService.matchupsWeek} 
@@ -59,13 +59,13 @@ export const Matchups = () => {
                                         display: 'flex',
                                         paddingX: 2.5,
                                         paddingY: 2,
-                                        border: 'solid 1.5px black',
-                                        borderRadius: '20px'
+                                        border: 'solid 1px black',
+                                        borderRadius: '10px'
                                     }}
                                 >
                                     <Box sx={{ display: 'flex', width: '100%', flexDirection: 'column', gap: 4 }}>
                                         {[0, 1].map((teamIndex) => (
-                                            <Box key={teamIndex} sx={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                                            <Box key={teamIndex} sx={{ display: 'flex', width: '100%', justifyContent: 'space-between', color: 'black' }}>
                                                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                                                     <Typography fontSize={12}>
                                                         {(ffService.selectedLeague.teams.find(t => t.team_key === match.teams.team[teamIndex].team_key)).team_standings.rank}
@@ -80,7 +80,11 @@ export const Matchups = () => {
                                                             {match.teams.team[teamIndex].name} ({(Number(match.teams.team[teamIndex].win_probability) * 100).toFixed()}%)
                                                         </Typography>
                                                         <Box sx={{ display: 'flex', gap: 1 }}>
-                                                            <Typography fontSize={12}>{match.teams.team[teamIndex].managers.manager.nickname}</Typography>
+                                                            { match.teams.team[teamIndex].managers.manager.nickname && 
+                                                                <Typography fontSize={12}>
+                                                                    {match.teams.team[teamIndex].managers.manager.nickname}
+                                                                </Typography>
+                                                            }
                                                             <Typography fontSize={12}>{getTeamRecord(match.teams.team[teamIndex])}</Typography>
                                                         </Box>
                                                     </Box>

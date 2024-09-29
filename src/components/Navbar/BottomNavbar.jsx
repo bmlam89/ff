@@ -132,7 +132,6 @@ export const BottomNavbar = () => {
         else setSelectedNavOption(navOptions[3]);
     }, [location.pathname]);
 
-    
     return (
         <>
             <Backdrop sx={(theme) => ({ 
@@ -153,7 +152,7 @@ export const BottomNavbar = () => {
                                             {league.name}
                                         </Typography>
                                     </Button>
-                                    <img src={league.teams.team.team_logos.team_logo.url} alt="Team Logo" style={{ width: 48, height: 48 }} />
+                                    <img src={league.teams.team.team_logos.team_logo.url} alt="Team Logo" style={{ width: 48, height: 48, borderRadius: '50%' }} />
                                 </Box>
                             ))}
                         </StyledBox>

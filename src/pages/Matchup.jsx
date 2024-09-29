@@ -190,7 +190,7 @@ export const Matchup = ({ selectedMatchup, hideButton }) => {
     
     useEffect(() => {
         if (!matchup && !ffService.selectedMatchup) ffService.setMatchupPage();
-        else if (ffService.selectedMatchup) setMatchup(ffService.selectedMatchup);
+        else if (!matchup && ffService.selectedMatchup) setMatchup(ffService.selectedMatchup);
     }, [ffService.selectedMatchup]);
 
     if (!matchup || !matchup.teams || !matchup.teams?.team || !matchup.teams?.team[0]?.roster) return <BasicLoading />;
